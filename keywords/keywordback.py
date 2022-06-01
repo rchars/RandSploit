@@ -4,7 +4,7 @@ import state.globals
 
 class Keyword(interfaces.keywordinterface.KeywordIface):
 	def __init__(self):
-		super().__init__(self, 'BACK')
+		super().__init__('BACK')
 
 	def complete(self):
 		return ''

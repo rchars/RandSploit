@@ -4,7 +4,7 @@ import state.globals
 
 class Keyword(interfaces.keywordinterface.KeywordIface):
 	def __init__(self):
-		super().__init__(self, 'EXECUTE')
+		super().__init__('EXECUTE')
 
 	def complete(self):
 		return ''

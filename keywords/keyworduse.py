@@ -6,7 +6,7 @@ import sys
 
 class Keyword(interfaces.keywordinterface.KeywordIface):
 	def __init__(self):
-		super().__init__(self, 'USE')
+		super().__init__('USE')
 
 	def complete(self):
 		def action(mod):

@@ -4,7 +4,7 @@ import state.globals
 
 class Keyword(interfaces.keywordinterface.KeywordIface):
 	def __init__(self):
-		super().__init__(self, 'SET')
+		super().__init__('SET')
 
 	def complete(self):
 		ret_str = ''

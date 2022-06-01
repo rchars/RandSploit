@@ -55,12 +55,12 @@ def load_keywords():
 		try:
 			if keyword_path.name.startswith('_'):
 				continue
-			keyword_mod = importlib.import_module(keyword_path.name, package='keywords')
+			keyword_mod = importlib.import_module(f'keywords.{keyword_path.stem}')
 			keyword_inst = keyword_mod.Keyword()
 			keyword_inst.execute
 			keyword_inst.complete
 			__KEYWORDS[keyword_inst.name] = keyword_inst
-			del sys.modules[keyword_inst.name]
+			del sys.modules[f'keywords.{keyword_path.stem}']
 		except AttributeError:
 			print(f'\'{keyword_path.name}\' is not a valid module')
 	

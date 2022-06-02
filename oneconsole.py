@@ -8,6 +8,24 @@ import sys
 import os
 
 
+class ModulesPathContainer:
+	def __init__(self, *directories):
+		self.__direcrories = directories
+		self.__index = 0
+		self.__buff = None
+		
+	def __iter__(self):
+		return self
+
+	def __next__(self):
+		if self.__index > 2:
+			self.__index = 0
+			raise StopIteration
+		self.__buff = self.__direcrories[self.__index].iterdir()
+		# tu skonczylem
+		
+
+
 # GLOBALS
 __KEYWORDS = {}
 
@@ -21,16 +39,18 @@ def console():
 			cmd = buff.split()
 			cmd_len = len(cmd)
 			state.globals.KEYWORD_CMD = cmd[1:-1]
+			state.globals.KEYWORD_CMD_LEN = len(state.globals.KEYWORD_CMD)
 			try:
-				# execute printuje wyniki, nie zwraca ich
-				# bo nawet nie wiem czy jest sens
 				__KEYWORDS[cmd[0]].execute()
 			except KeyError:
-				# nie mam pojecia czemu to nie dziala jak trzeba
+				# nie dziala jak trzeba
+				# problem z outputem
 				shell_proc = subprocess.run(cmd, text=True, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 				for info in (shell_proc.stdout, shell_proc.stderr):
 					if info:
 						print(info)
+			except Exception as keyword_err:
+				print(keyword_err)
 		except KeyboardInterrupt:
 			print('')
 		except EOFError:
@@ -63,21 +83,18 @@ def load_keywords():
 			del sys.modules[f'keywords.{keyword_path.stem}']
 		except AttributeError:
 			print(f'\'{keyword_path.name}\' is not a valid module')
-	
+
 
 if __name__ == '__main__':
 	try:
-		# jak to nie zadziala
-		# to klawiatury nie pozaluje
 		sys.path.append('..')
 		state.globals.PROMPT_STR = 'frame>'
 		state.globals.KEYWORDS_PATH = pathlib.Path('keywords')
+		state.globals.MODULES_PATH = ModulesPathContainer(
+			pathlib.Path('modules'),
+			pathlib.Path().home() / pathlib.Path('.FrameworkOne/modules')
+		)
 		load_keywords()
 		console()
 	except(KeyboardInterrupt, EOFError):
 		sys.exit()
-
-
-# Czego jeszcze brakuje:
-# Interfejsu modolow specjalnych
-# Jakichkolwiek modulow

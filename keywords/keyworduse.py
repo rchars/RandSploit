@@ -30,10 +30,13 @@ class Keyword(interfaces.keywordinterface.KeywordIface):
 		except AttributeError:
 			print(f'Module \'{mod.name}\' is invalid')
 			return False
-	
+
 	def __proces_module(self, action):
-		for mod_path in state.globals.MODULES_PATH:
-			result = self.__validate_modules(mod_path)
-			if not result:
-				continue
-			action(result)
+		for dir_mod_path in state.globals.MODULES_PATH:
+			for mod_path in dir_mod_path.iterdir():
+				if mod_path.name.startswith('_'):
+					continue
+				result = self.__validate_modules(mod_path)
+				if not result:
+					continue
+				action(result)

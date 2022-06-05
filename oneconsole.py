@@ -36,12 +36,15 @@ def console():
 		except EOFError:
 			sys.exit()
 
-
-def complete(text, state):
-	if state == 0:
+# FINISHED HERE
+# INPUT IS NOT WORKING
+def complete(text, completer_state):
+	if completer_state == 0:
 		if not text:
+			keyword_names_str = ''
 			for keyword_name in __KEYWORDS.keys():
-				print(keyword_name)
+				keyword_names_str += f'{keyword_name} '
+			return f'\n{keyword_names_str}\n{state.globals.PROMPT_STR}'
 		else:
 			buff = text.split()
 			state.globals.KEYWORD_COMPLETE_CMD = buff[1:-1]
@@ -49,7 +52,7 @@ def complete(text, state):
 			try:
 				return __KEYWORDS[buff[0]].complete()
 			except KeyError:
-				return ''
+				return '\n'
 
 
 def load_keywords():
@@ -75,6 +78,8 @@ if __name__ == '__main__':
 		state.globals.MODULES_PATH = pathlib.Path('modules')
 		state.globals.USER_MODULES_PATH = pathlib.Path().home() / pathlib.Path('.FrameworkOne/modules')
 		state.globals.USER_MODULES_PATH.mkdir(parents=True, exist_ok=True)
+		readline.set_completer(complete)
+		readline.parse_and_bind('tab: complete')
 		load_keywords()
 		console()
 	except(KeyboardInterrupt, EOFError):

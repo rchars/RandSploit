@@ -8,24 +8,6 @@ import sys
 import os
 
 
-class ModulesPathContainer:
-	def __init__(self, *directories):
-		self.__direcrories = directories
-		self.__index = 0
-		self.__buff = None
-		
-	def __iter__(self):
-		return self
-
-	def __next__(self):
-		if self.__index > 2:
-			self.__index = 0
-			raise StopIteration
-		self.__buff = self.__direcrories[self.__index].iterdir()
-		# tu skonczylem
-		
-
-
 # GLOBALS
 __KEYWORDS = {}
 
@@ -90,10 +72,9 @@ if __name__ == '__main__':
 		sys.path.append('..')
 		state.globals.PROMPT_STR = 'frame>'
 		state.globals.KEYWORDS_PATH = pathlib.Path('keywords')
-		state.globals.MODULES_PATH = ModulesPathContainer(
-			pathlib.Path('modules'),
-			pathlib.Path().home() / pathlib.Path('.FrameworkOne/modules')
-		)
+		state.globals.MODULES_PATH = pathlib.Path('modules')
+		state.globals.USER_MODULES_PATH = pathlib.Path().home() / pathlib.Path('.FrameworkOne/modules')
+		state.globals.USER_MODULES_PATH.mkdir(parents=True, exist_ok=True)
 		load_keywords()
 		console()
 	except(KeyboardInterrupt, EOFError):

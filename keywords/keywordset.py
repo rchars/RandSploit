@@ -19,7 +19,8 @@ class Keyword(interfaces.keywordinterface.KeywordIface):
 
 	def execute(self):
 		if state.globals.KEYWORD_CMD_LEN == 0:
-			raise ValueError('Missing register name and value')
+			print('Missing register name and value')
+			return None
 		reg_name = state.globals.KEYWORD_CMD[0]
 		new_value = None
 		if state.globals.KEYWORD_CMD_LEN == 1:
@@ -28,7 +29,7 @@ class Keyword(interfaces.keywordinterface.KeywordIface):
 			new_value = state.globals.KEYWORD_CMD[1]
 		try:
 			if not state.globals.ACTIVE_MODULE:
-				raise ValueError('No Module choosen')
+				print('No Module choosen')
 			state.globals.ACTIVE_MODULE.set_new_value(reg_name, new_value)
 		except Exception as validator_err:
 			print(validator_err)

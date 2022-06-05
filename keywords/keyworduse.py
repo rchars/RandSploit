@@ -1,47 +1,60 @@
 import interfaces.keywordinterface
 import state.globals
 import importlib
-import sys
 
 
 class Keyword(interfaces.keywordinterface.KeywordIface):
 	def __init__(self):
 		super().__init__('USE')
-
-	def complete(self):
-		def action(mod):
-			print(f'{mod.name}')
-		self.__process_module(action)
-
-	def execute(self):
-		def action(mod):
-			state.globals.ACTIVE_MODULE = mod
-		self.__process_module(action)
-
-	def __validate_modules(self, mod_path):
-		mod = importlib.import_module(mod_path.name, mod_path.parent)
+		self.__module_paths = (
+			state.globals.USER_MODULES_PATH,
+			state.globals.MODULES_PATH
+		)
+		self.__execute_buff = ''
+		self.__complete_buff = ''
+		
+	def __get_inst(mod_path):
 		try:
-			mod_instance = mod.Module()
-			mod_instance.registers
-			mod_instance.name
-			buff = mod_instance
-			del sys.modules[mod_instance.name]
-			return buff
-		except AttributeError:
-			print(f'Module \'{mod.name}\' is invalid')
-			return False
-	
-	# THERE
-	def __process_module(self, action):
-		search_locations = (state.globals.MODULES_PATH, state.globals.USER_MODULES_PATH)
-		location_index = 0
-		while location_index < 2:
-			for mod_path in search_locations[location_index].iterdir():
-				if mod_path.name.startswith('_'): 
+			mod = importlib.import_module(mod_path.resolve())
+			mod_inst = mod.Module()
+			mod.resgisters
+			mod.execute
+			mod.name
+		except AttributeError as module_err:
+			mod_inst = module_err
+		finally:
+			del sys.modules[mod_path.stem]
+		return mod_inst
+		
+		
+	def __iterate_sources(self, action):
+		mod_counter = 0
+		while mod_counter < 2:
+			for mod_path in self.__module_paths[mod_counter].iterdir():
+				if mod_path.name.startswith('_'):
 					continue
-				restult = self.__validate_modules(mod_path)
-				if result:
-					action(result)
-					return None
+				mod_inst = __get_inst(mod_path)
+				# if mod_inst is a string
+				# action function has to
+				# handle this behaviour
+				action(mod_inst)
 			else:
-				location_index += 1
+				mod_counter += 1
+				
+	def complete(self):
+		def action(mod_inst):
+			if type(mod_inst) == str:
+				self.__complete_buff = ''
+			self.__complete_buff = f'{mod_inst.name} '
+		self.__iterate_sources(action)
+		
+	def execute(self):
+		if state.globals.KEYWORD_CMD_LEN > 0:
+			def action(mod_inst):
+				if type(mod_inst) == str:
+					print(mod_inst)
+				else:
+					state.globals.ACTIVE_MODULE = mod_inst
+			self.__iterate_sources(action)
+		else:
+			print('Need module name')

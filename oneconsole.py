@@ -20,10 +20,10 @@ def console():
 				continue
 			cmd = buff.split()
 			cmd_len = len(cmd)
-			state.globals.KEYWORD_CMD = cmd[1:-1]
+			state.globals.KEYWORD_CMD = cmd[1:]
 			state.globals.KEYWORD_CMD_LEN = len(state.globals.KEYWORD_CMD)
 			try:
-				__KEYWORDS[cmd[0]].execute()
+				__KEYWORDS[cmd[0].upper()].execute()
 			except KeyError:
 				# nie dziala jak trzeba
 				# problem z outputem
@@ -31,8 +31,6 @@ def console():
 				for info in (shell_proc.stdout, shell_proc.stderr):
 					if info:
 						print(info)
-			except Exception as keyword_err:
-				print(keyword_err)
 		except KeyboardInterrupt:
 			print('')
 		except EOFError:
@@ -46,8 +44,10 @@ def complete(text, state):
 				print(keyword_name)
 		else:
 			buff = text.split()
+			state.globals.KEYWORD_COMPLETE_CMD = buff[1:-1]
+			state.globals.KEYWORD_COMPLETE_CMD_LEN = len(state.globals.KEYWORD_COMPLETE_CMD)
 			try:
-				return __KEYWORDS[buff[0]].complete(buff[1:-1])
+				return __KEYWORDS[buff[0]].complete()
 			except KeyError:
 				return ''
 

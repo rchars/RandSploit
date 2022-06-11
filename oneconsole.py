@@ -1,61 +1,68 @@
 import state.globals
-import subprocess
 import importlib
 import readline
 import pathlib
 import atexit
+import cmd
 import sys
 import os
 
 
-# GLOBALS
-__KEYWORDS = {}
+class Console(cmd.Cmd):
+	def __init__(self, keywords):
+		self.__keywords = keywords
+		self.prompt = state.globals.PROMPT_STR
+		# self.identchars = list(keywords.keys())
+		super().__init__()
 
-
-def console():
-	while True:
-		try:
-			buff = input(state.globals.PROMPT_STR)
-			if not buff:
-				continue
-			cmd = buff.split()
-			cmd_len = len(cmd)
-			state.globals.KEYWORD_CMD = cmd[1:]
-			state.globals.KEYWORD_CMD_LEN = len(state.globals.KEYWORD_CMD)
-			try:
-				__KEYWORDS[cmd[0].upper()].execute()
-			except KeyError:
-				# nie dziala jak trzeba
-				# problem z outputem
-				shell_proc = subprocess.run(cmd, text=True, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-				for info in (shell_proc.stdout, shell_proc.stderr):
-					if info:
-						print(info)
-		except KeyboardInterrupt:
-			print('')
-		except EOFError:
-			sys.exit()
-
-# FINISHED HERE
-# INPUT IS NOT WORKING
-def complete(text, completer_state):
-	if completer_state == 0:
-		if not text:
-			keyword_names_str = ''
-			for keyword_name in __KEYWORDS.keys():
-				keyword_names_str += f'{keyword_name} '
-			return f'\n{keyword_names_str}\n{state.globals.PROMPT_STR}'
+	def completenames(self, text, line, begidx, endidx):
+		ret_val = []
+		buff = line.upper().split()
+		buff_len = len(buff)
+		if not buff:
+			ret_val = list(self.__keywords.keys())
+		elif buff_len == 1:
+			for keyword in self.__keywords.keys():
+				if keyword.startswith(buff[0]):
+					ret_val.append(keyword)
 		else:
-			buff = text.split()
-			state.globals.KEYWORD_COMPLETE_CMD = buff[1:-1]
-			state.globals.KEYWORD_COMPLETE_CMD_LEN = len(state.globals.KEYWORD_COMPLETE_CMD)
 			try:
-				return __KEYWORDS[buff[0]].complete()
-			except KeyError:
-				return '\n'
+				self.__update_cmd(buff[1:-1])
+				ret_val = self.__keywords[buff[0]].complete().split()
+			except(KeyError, AttributeError):
+				return ret_val
+		return ret_val
+
+	def postcmd(self, stop, line):
+		cmd = line.split()
+		cmd_len = len(cmd)
+		if not cmd:
+			return False
+		try:
+			self.__update_cmd(cmd[1:-1])
+			self.__keywords[cmd[0]].execute()
+		except KeyError:
+			os.system(line)
+		except Exception as keyword_err:
+			print(keyword_err)
+		finally:
+			return False
+
+	# dont know what to do with this
+	# this must be here for error
+	# supressing
+	def default(self, line):
+		pass
+
+	def __update_cmd(self, cmd):
+		state.globals.KEYWORD_CMD = cmd
+		state.globals.KEYWORD_CMD_LEN = len(cmd)
 
 
+
+# This works well
 def load_keywords():
+	ret_keywords = {}
 	for keyword_path in state.globals.KEYWORDS_PATH.iterdir():
 		try:
 			if keyword_path.name.startswith('_'):
@@ -64,10 +71,12 @@ def load_keywords():
 			keyword_inst = keyword_mod.Keyword()
 			keyword_inst.execute
 			keyword_inst.complete
-			__KEYWORDS[keyword_inst.name] = keyword_inst
+			ret_keywords[keyword_inst.name] = keyword_inst
 			del sys.modules[f'keywords.{keyword_path.stem}']
 		except AttributeError:
 			print(f'\'{keyword_path.name}\' is not a valid module')
+	else:
+		return ret_keywords
 
 
 if __name__ == '__main__':
@@ -78,9 +87,7 @@ if __name__ == '__main__':
 		state.globals.MODULES_PATH = pathlib.Path('modules')
 		state.globals.USER_MODULES_PATH = pathlib.Path().home() / pathlib.Path('.FrameworkOne/modules')
 		state.globals.USER_MODULES_PATH.mkdir(parents=True, exist_ok=True)
-		readline.set_completer(complete)
-		readline.parse_and_bind('tab: complete')
-		load_keywords()
-		console()
+		console_inst = Console(load_keywords())
+		console_inst.cmdloop()
 	except(KeyboardInterrupt, EOFError):
 		sys.exit()

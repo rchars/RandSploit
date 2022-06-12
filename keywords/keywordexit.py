@@ -1,5 +1,5 @@
 import interfaces.keywordinterface
-import sys
+import state.globals
 
 
 class Keyword(interfaces.keywordinterface.KeywordIface):
@@ -10,4 +10,4 @@ class Keyword(interfaces.keywordinterface.KeywordIface):
 		return ''
 
 	def execute(self):
-		sys.exit()
+		state.globals.EXIT_SCRIPT = True

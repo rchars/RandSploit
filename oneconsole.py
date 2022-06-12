@@ -40,13 +40,13 @@ class Console(cmd.Cmd):
 			return False
 		try:
 			self.__update_cmd(cmd[1:-1])
-			self.__keywords[cmd[0]].execute()
+			self.__keywords[cmd[0].upper()].execute()
 		except KeyError:
 			os.system(line)
 		except Exception as keyword_err:
 			print(keyword_err)
 		finally:
-			return False
+			return state.globals.EXIT_SCRIPT
 
 	# dont know what to do with this
 	# this must be here for error
@@ -57,7 +57,6 @@ class Console(cmd.Cmd):
 	def __update_cmd(self, cmd):
 		state.globals.KEYWORD_CMD = cmd
 		state.globals.KEYWORD_CMD_LEN = len(cmd)
-
 
 
 # This works well

@@ -9,10 +9,7 @@ class Keyword(interfaces.keywordinterface.KeywordIface):
 		self.__module_paths = (
 			state.globals.USER_MODULES_PATH,
 			state.globals.MODULES_PATH
-		)
-
 	def complete(self):
 		pass
-
 	def execute(self):
 		pass

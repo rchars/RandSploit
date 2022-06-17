@@ -1,3 +1,5 @@
+from operator import mod
+from rlcompleter import Completer
 import state.globals
 import importlib
 import readline
@@ -8,6 +10,31 @@ import sys
 import os
 
 
+class ModulesPathsManager:
+	def __init__(self, *modules_paths):
+		self.__modules_paths = modules_paths
+		self.__paths_len = len(self.__modules_paths)
+
+	def __iter__(self):
+		self.__index = 0
+		self.__current_path = self.__modules_paths[0].iterdir()
+		return self
+
+	def __next__(self):
+		ret_path = None
+		while not ret_path:
+			try:
+				mod_path = next(self.__current_path)
+				if not mod_path.name.startswith('_'):
+					ret_path = mod_path
+			except StopIteration:
+				self.__index += 1
+				if self.__index >= self.__paths_len:
+					raise StopIteration
+				self.__current_path = self.__modules_paths[self.__index].iterdir()
+		return ret_path
+
+
 class Console(cmd.Cmd):
 	def __init__(self, keywords):
 		self.__keywords = keywords
@@ -15,31 +42,39 @@ class Console(cmd.Cmd):
 		# self.identchars = list(keywords.keys())
 		super().__init__()
 
-	def completenames(self, text, line, begidx, endidx):
-		ret_val = []
-		buff = line.upper().split()
-		buff_len = len(buff)
-		if not buff:
-			ret_val = list(self.__keywords.keys())
-		elif buff_len == 1:
-			for keyword in self.__keywords.keys():
-				if keyword.startswith(buff[0]):
-					ret_val.append(keyword)
-		else:
-			try:
-				self.__update_cmd(buff[1:-1])
-				ret_val = self.__keywords[buff[0]].complete().split()
-			except(KeyError, AttributeError):
-				return ret_val
-		return ret_val
+	# def completenames(self, text, line, begidx, endidx):
+	# 	ret_val = []
+	# 	buff = line.upper().split()
+	# 	buff_len = len(buff)
+	# 	if not buff:
+	# 		ret_val = list(self.__keywords.keys())
+	# 	elif buff_len == 1:
+	# 		for keyword in self.__keywords.keys():
+	# 			if keyword.startswith(buff[0]):
+	# 				ret_val.append(keyword)
+	# 	return ret_val
 
+	def completedefault(self, text, line, *ignored):
+		complete_list = []
+		list_line = line.upper().split()
+		if len(list_line) <= 1:
+			for keyword in self.__keywords.keys():
+				pass
+			# FINISHED HERE
+		self.__update_cmd(list_line[1:])
+		try:	
+			complete_list = self.__keywords[list_line[0]].complete()
+		except(KeyError, AttributeError):
+			pass
+		finally:
+			return complete_list
+	
 	def postcmd(self, stop, line):
 		cmd = line.split()
-		cmd_len = len(cmd)
 		if not cmd:
 			return False
 		try:
-			self.__update_cmd(cmd[1:-1])
+			self.__update_cmd(cmd[1:])
 			self.__keywords[cmd[0].upper()].execute()
 		except KeyError:
 			os.system(line)
@@ -83,9 +118,10 @@ if __name__ == '__main__':
 		sys.path.append('..')
 		state.globals.PROMPT_STR = 'frame>'
 		state.globals.KEYWORDS_PATH = pathlib.Path('keywords')
-		state.globals.MODULES_PATH = pathlib.Path('modules')
-		state.globals.USER_MODULES_PATH = pathlib.Path().home() / pathlib.Path('.FrameworkOne/modules')
-		state.globals.USER_MODULES_PATH.mkdir(parents=True, exist_ok=True)
+		modules_path = pathlib.Path('modules')
+		user_modules_path = pathlib.Path().home() / pathlib.Path('.FrameworkOne/modules')
+		user_modules_path.mkdir(parents=True, exist_ok=True)
+		state.globals.MODULE_MANAGER = ModulesPathsManager(user_modules_path, modules_path)
 		console_inst = Console(load_keywords())
 		console_inst.cmdloop()
 	except(KeyboardInterrupt, EOFError):

@@ -39,31 +39,27 @@ class Console(cmd.Cmd):
 	def __init__(self, keywords):
 		self.__keywords = keywords
 		self.prompt = state.globals.PROMPT_STR
-		# self.identchars = list(keywords.keys())
 		super().__init__()
 
-	# def completenames(self, text, line, begidx, endidx):
-	# 	ret_val = []
-	# 	buff = line.upper().split()
-	# 	buff_len = len(buff)
-	# 	if not buff:
-	# 		ret_val = list(self.__keywords.keys())
-	# 	elif buff_len == 1:
-	# 		for keyword in self.__keywords.keys():
-	# 			if keyword.startswith(buff[0]):
-	# 				ret_val.append(keyword)
-	# 	return ret_val
+	def completenames(self, text, line, begidx, endidx):
+		ret_val = []
+		buff = line.upper().split()
+		buff_len = len(buff)
+		if not buff:
+			ret_val = list(self.__keywords.keys())
+		elif buff_len == 1:
+			for keyword in self.__keywords.keys():
+				if keyword.startswith(buff[0]):
+					ret_val.append(keyword)
+		return ret_val
 
 	def completedefault(self, text, line, *ignored):
 		complete_list = []
 		list_line = line.upper().split()
-		if len(list_line) <= 1:
-			for keyword in self.__keywords.keys():
-				pass
-			# FINISHED HERE
 		self.__update_cmd(list_line[1:])
 		try:	
 			complete_list = self.__keywords[list_line[0]].complete()
+			# return complete_list
 		except(KeyError, AttributeError):
 			pass
 		finally:
@@ -83,9 +79,7 @@ class Console(cmd.Cmd):
 		finally:
 			return state.globals.EXIT_SCRIPT
 
-	# dont know what to do with this
-	# this must be here for error
-	# supressing
+	# No idea what to do with this
 	def default(self, line):
 		pass
 
@@ -94,7 +88,6 @@ class Console(cmd.Cmd):
 		state.globals.KEYWORD_CMD_LEN = len(cmd)
 
 
-# This works well
 def load_keywords():
 	ret_keywords = {}
 	for keyword_path in state.globals.KEYWORDS_PATH.iterdir():

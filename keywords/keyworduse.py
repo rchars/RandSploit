@@ -18,7 +18,7 @@ class Keyword(interfaces.keywordinterface.KeywordIface):
 		for mod_path in state.globals.MODULE_MANAGER:
 			mod_inst = self.__get_inst(mod_path)
 			try:
-				if not state.globals.KEYWORD_CMD and mod_inst.name not in ret_list or mod_inst.name == state.globals.KEYWORD_CMD[0]:
+				if not state.globals.KEYWORD_CMD and mod_inst.name not in ret_list or mod_inst.name.upper().startswith(state.globals.KEYWORD_CMD[0]):
 					ret_list.append(mod_inst.name)
 			except AttributeError:
 				continue

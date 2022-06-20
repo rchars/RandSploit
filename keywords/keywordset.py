@@ -7,29 +7,8 @@ class Keyword(interfaces.keywordinterface.KeywordIface):
 		super().__init__('SET')
 
 	def complete(self):
-		ret_str = ''
-		if state.globals.KEYWORD_CMD_LEN == 0:
-			for reg_info in state.globals.ACTIVE_MODULE.registers:
-				ret_str += f'{reg_info[0]} '
-		elif state.globals.KEYWORD_CMD_LEN == 1:
-			for reg_info in state.globals.ACTIVE_MODULE.registers:
-				if reg_info[0].startswith(globals.KEYWORD_CMD[1]):
-					ret_str += f'{reg_info[0]} '
-		return ret_str
-
+		if not state.globals.ACTIVE_MODULE:
+			raise ValueError('Need a module')
+		
 	def execute(self):
-		if state.globals.KEYWORD_CMD_LEN == 0:
-			print('Missing register name and value')
-			return None
-		reg_name = state.globals.KEYWORD_CMD[0]
-		new_value = None
-		if state.globals.KEYWORD_CMD_LEN == 1:
-			new_value = ''
-		elif state.globals.KEYWORD_CMD_LEN >= 2:
-			new_value = state.globals.KEYWORD_CMD[1]
-		try:
-			if not state.globals.ACTIVE_MODULE:
-				print('No Module choosen')
-			state.globals.ACTIVE_MODULE.set_new_value(reg_name, new_value)
-		except Exception as validator_err:
-			print(validator_err)
+		pass

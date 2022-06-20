@@ -1,4 +1,3 @@
-from operator import mod
 import interfaces.moduleinterface
 
 

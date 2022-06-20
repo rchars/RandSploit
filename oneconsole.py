@@ -1,5 +1,3 @@
-from operator import mod
-from rlcompleter import Completer
 import state.globals
 import importlib
 import readline
@@ -39,7 +37,7 @@ class Console(cmd.Cmd):
 	def __init__(self, keywords):
 		self.__keywords = keywords
 		self.prompt = state.globals.PROMPT_STR
-		super().__init__()
+		cmd.Cmd.__init__(self)
 
 	def completenames(self, text, line, begidx, endidx):
 		ret_val = []
@@ -59,7 +57,6 @@ class Console(cmd.Cmd):
 		self.__update_cmd(list_line[1:])
 		try:	
 			complete_list = self.__keywords[list_line[0]].complete()
-			# return complete_list
 		except(KeyError, AttributeError):
 			pass
 		finally:
@@ -78,10 +75,11 @@ class Console(cmd.Cmd):
 			print(keyword_err)
 		finally:
 			return state.globals.EXIT_SCRIPT
-
+		
 	# No idea what to do with this
 	def default(self, line):
 		pass
+
 
 	def __update_cmd(self, cmd):
 		state.globals.KEYWORD_CMD = cmd

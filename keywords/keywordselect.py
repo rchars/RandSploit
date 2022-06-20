@@ -5,7 +5,7 @@ import importlib.util
 
 class Keyword(interfaces.keywordinterface.KeywordIface):
 	def __init__(self):
-		super().__init__('USE')
+		super().__init__('SELECT')
 
 	def __get_inst(self, mod_path):
 		spec = importlib.util.spec_from_file_location(mod_path.stem + '.Module', mod_path)

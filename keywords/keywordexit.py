@@ -7,7 +7,7 @@ class Keyword(interfaces.keywordinterface.KeywordIface):
 		super().__init__('EXIT')
 
 	def complete(self):
-		return ''
+		return []
 
 	def execute(self):
 		state.globals.EXIT_SCRIPT = True

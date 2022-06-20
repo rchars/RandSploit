@@ -7,10 +7,7 @@ class Keyword(interfaces.keywordinterface.KeywordIface):
 		super().__init__('BACK')
 
 	def complete(self):
-		return ''
+		return []
 	
 	def execute(self):
-		# tu powinien byc modul specjalny
-		# czyli to co jest zawsze odpalane
-		# na poczatku skryptu
 		state.globals.ACTIVE_MODULE = None

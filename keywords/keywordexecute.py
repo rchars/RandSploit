@@ -7,11 +7,10 @@ class Keyword(interfaces.keywordinterface.KeywordIface):
 		super().__init__('EXECUTE')
 
 	def complete(self):
-		return ''
+		return []
 
 	def execute(self):
 		try:
-			# testowane, zadziala
 			state.globals.ACTIVE_MODULE.execute()
 		except AttributeError:
 			print('Nothin to execute')

@@ -1,36 +1,31 @@
 from abc import ABC, abstractmethod
 
 
-class __RegisterData:
-	def __init__(self, value='', description='', validator=None):
-		self.value = value
+class Register:
+	def __init__(self, description, value, validator):
 		self.description = description
+		self.value = value
 		self.validator = validator
 
-class RegisterManager:
-	__data = {}
 
-	def add_register(self, name, **optional):
-		if not name:
-			raise ValueError('Need a name')
-		elif name in self.__data.keys():
-			raise ValueError(f'Register with name \'{name}\' already exist')
-		self.__data[name] = __RegisterData(optional)
-	
-	def update_value(self, name, new_value):
-		register = self.get_by_name(name)
-		if callable(register.validator):
-			register.validator(new_value)
-		register.value = new_value
+# def write_reg_values(self, name, new_value):
+# 	validator = state.globals.ACTIVE_MODULE_REGS[name].validator
+# 	if validator:
+# 		validator(new_value)
+# 	state.globals.ACTIVE_MODULE_REGS[name] = new_value
 
-	def get_by_name(self, name):
-		return self.__data[name]
 
 class ModuleInterface(ABC):
 	def __init__(self, name):
+		self.registers = {}
 		self.name = name
-		self.registers = RegisterManager()
-
+	
 	@abstractmethod
 	def execute(self):
 		pass
+
+	def add_reg(self, name, description='', value='', validator=None):
+		self.registers[name] = Register(description, value, validator)
+
+	def get_reg(self, name):
+		return self.registers[name]

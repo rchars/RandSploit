@@ -11,3 +11,4 @@ class Keyword(interfaces.keywordinterface.KeywordIface):
 
 	def execute(self):
 		state.globals.EXIT_SCRIPT = True
+		return ''

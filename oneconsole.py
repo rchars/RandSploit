@@ -1,8 +1,6 @@
 import state.globals
 import importlib
-import readline
 import pathlib
-import atexit
 import cmd
 import sys
 import os
@@ -41,22 +39,22 @@ class Console(cmd.Cmd):
 
 	def completenames(self, text, line, begidx, endidx):
 		ret_val = []
-		buff = line.upper().split()
+		buff = line.split()
 		buff_len = len(buff)
 		if not buff:
 			ret_val = list(self.__keywords.keys())
 		elif buff_len == 1:
 			for keyword in self.__keywords.keys():
-				if keyword.startswith(buff[0]):
+				if keyword.startswith(buff[0].upper()):
 					ret_val.append(keyword)
 		return ret_val
 
 	def completedefault(self, text, line, *ignored):
 		complete_list = []
-		list_line = line.upper().split()
+		list_line = line.split()
 		self.__update_cmd(list_line[1:])
 		try:	
-			complete_list = self.__keywords[list_line[0]].complete()
+			complete_list = self.__keywords[list_line[0].upper()].complete()
 		except(KeyError, AttributeError):
 			pass
 		finally:
@@ -68,18 +66,20 @@ class Console(cmd.Cmd):
 			return False
 		try:
 			self.__update_cmd(cmd[1:])
-			self.__keywords[cmd[0].upper()].execute()
+			ret_str = self.__keywords[cmd[0].upper()].execute()
+			if '\r\n' in ret_str:
+				print(ret_str, end='')
+			elif ret_str:
+				print(ret_str)
+			self.prompt = state.globals.PROMPT_STR
 		except KeyError:
 			os.system(line)
-		except Exception as keyword_err:
-			print(keyword_err)
 		finally:
 			return state.globals.EXIT_SCRIPT
 		
 	# No idea what to do with this
 	def default(self, line):
 		pass
-
 
 	def __update_cmd(self, cmd):
 		state.globals.KEYWORD_CMD = cmd

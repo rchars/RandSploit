@@ -13,6 +13,7 @@ class Keyword(interfaces.keywordinterface.KeywordIface):
 		try:
 			state.globals.ACTIVE_MODULE.execute()
 		except AttributeError:
-			print('Nothin to execute')
+			return 'Choose module first'
 		except Exception as module_err:
-			print(module_err)
+			return f'Module {state.globals.ACTIVE_MODULE.name} exception: {module_err}'
+		return ''

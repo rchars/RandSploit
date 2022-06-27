@@ -1,9 +1,9 @@
-import state.globals
-import importlib
-import pathlib
+import ModulePattern.OneModuleIface
 import cmd
-import sys
+import importlib.machinery
 import os
+import pathlib
+import sys
 
 
 class ModulesPathsManager:
@@ -17,103 +17,142 @@ class ModulesPathsManager:
 		return self
 
 	def __next__(self):
-		ret_path = None
-		while not ret_path:
+		ret_mod = None
+		while not ret_mod:
 			try:
 				mod_path = next(self.__current_path)
 				if not mod_path.name.startswith('_'):
-					ret_path = mod_path
+					try:
+						mod = self.__get_mod_inst(mod_path)
+						self.__validate_mod(mod)
+					except(TypeError, AttributeError):
+						continue
+					ret_mod = mod
 			except StopIteration:
 				self.__index += 1
 				if self.__index >= self.__paths_len:
 					raise StopIteration
 				self.__current_path = self.__modules_paths[self.__index].iterdir()
-		return ret_path
+		return ret_mod
+
+	def __get_mod_inst(self, path):
+		return importlib.machinery.SourceFileLoader(path.stem, str(path.resolve()))
+
+	# this can raise TypeError or AttibuteError
+	def __validate_mod(self, mod):
+		if not callable(mod.run):
+			raise TypeError
+		elif type(mod.NAME) != str:
+			raise TypeError
 
 
 class Console(cmd.Cmd):
-	def __init__(self, keywords):
-		self.__keywords = keywords
-		self.prompt = state.globals.PROMPT_STR
+	def __init__(self, mod_manager):
 		cmd.Cmd.__init__(self)
-
-	def completenames(self, text, line, begidx, endidx):
-		ret_val = []
-		buff = line.split()
-		buff_len = len(buff)
-		if not buff:
-			ret_val = list(self.__keywords.keys())
-		elif buff_len == 1:
-			for keyword in self.__keywords.keys():
-				if keyword.startswith(buff[0].upper()):
-					ret_val.append(keyword)
-		return ret_val
-
-	def completedefault(self, text, line, *ignored):
-		complete_list = []
-		list_line = line.split()
-		self.__update_cmd(list_line[1:])
-		try:	
-			complete_list = self.__keywords[list_line[0].upper()].complete()
-		except(KeyError, AttributeError):
-			pass
-		finally:
-			return complete_list
+		self.prompt = 'frame>'
+		self.call_dict = {
+			'use': self.use,
+			'help': self.help,
+			'set': self.set,
+			'exit': self.exit,
+			'run': self.run,
+			'back': self.back,
+			'registers': self.registers
+		}
+		self.completion_call_dict = {
+			'use': self.complete_use,
+			'help': self.complete_help,
+			'set': self.complete_set,
+		}
+		self.command_list = None
+		self.keyword_wordlist = []
+		self.terminate_console = False
+		self.mod_manager = mod_manager
 	
-	def postcmd(self, stop, line):
-		cmd = line.split()
-		if not cmd:
-			return False
-		try:
-			self.__update_cmd(cmd[1:])
-			ret_str = self.__keywords[cmd[0].upper()].execute()
-			if '\r\n' in ret_str:
-				print(ret_str, end='')
-			elif ret_str:
-				print(ret_str)
-			self.prompt = state.globals.PROMPT_STR
-		except KeyError:
-			os.system(line)
-		finally:
-			return state.globals.EXIT_SCRIPT
-		
-	# No idea what to do with this
-	def default(self, line):
+	def completenames(self, text, line, begidx, endidx):
+		matches = []
+		for keyword_name in self.call_dict.keys():
+			if keyword_name.startswith(line.lower()):
+				matches.append(keyword_name)
+		return matches
+	
+	def completedefault(self, text, line, *ignored):
+		matches = []
+		words = line.split()
+		keyword_name = words[0]
+		if keyword_name in self.call_dict.keys():
+			self.keyword_wordlist = words[1:]
+			matches = self.completion_call_dict[keyword_name]()
+		return matches
+
+	def onecmd(self, line):
+		self.command_list = line.split()
+		self.command_list_len = len(self.command_list)
+		if self.command_list_len >= 1:
+			keyword_name = self.command_list[0]
+			try:
+				self.call_dict[keyword_name]()
+			except KeyError:
+				os.system(line)
+		return self.terminate_console
+
+	# def postcmd(self, stop, line):
+	# 	words = line.split()
+	# 	if not words:
+	# 		return self.terminate_console
+	# 	entered_keyword = words[0]
+	# 	if entered_keyword in self.call_dict.keys():
+	# 		result = self.call_dict[entered_keyword]()
+	# 		if '\n' in result:
+	# 			print(result, end='')
+	# 		elif result:
+	# 			print(result, end='')
+	# 	return self.terminate_console
+
+	def complete_use(self, *ignored):
+		print('fsgdfsg')
+	
+	def use(self):
+		'''Uses a modules'''
 		pass
-
-	def __update_cmd(self, cmd):
-		state.globals.KEYWORD_CMD = cmd
-		state.globals.KEYWORD_CMD_LEN = len(cmd)
-
-
-def load_keywords():
-	ret_keywords = {}
-	for keyword_path in state.globals.KEYWORDS_PATH.iterdir():
-		try:
-			if keyword_path.name.startswith('_'):
-				continue
-			keyword_mod = importlib.import_module(f'keywords.{keyword_path.stem}')
-			keyword_inst = keyword_mod.Keyword()
-			keyword_inst.execute
-			keyword_inst.complete
-			ret_keywords[keyword_inst.name] = keyword_inst
-			del sys.modules[f'keywords.{keyword_path.stem}']
-		except AttributeError:
-			print(f'\'{keyword_path.name}\' is not a valid module')
-	else:
-		return ret_keywords
-
+	
+	def complete_help(self, *ignored):
+		pass
+	
+	def help(self):
+		'''Displays help about keywords'''
+		pass
+	
+	def complete_set(self, *ignored):
+		pass
+	
+	def set(self):
+		'''Sets an active module\'s registers'''
+		pass
+	
+	def exit(self):
+		'''Exits script'''
+		pass
+	
+	def run(self):
+		'''Runs active module'''
+		pass
+	
+	def back(self):
+		'''Unsets active module'''
+		pass
+	
+	def registers(self):
+		'''Displays a registers of the active module'''
+		pass
 
 if __name__ == '__main__':
 	try:
-		sys.path.append('..')
-		state.globals.PROMPT_STR = 'frame>'
-		state.globals.KEYWORDS_PATH = pathlib.Path('keywords')
+		# sys.path.append('..')
 		modules_path = pathlib.Path('modules')
-		user_modules_path = pathlib.Path().home() / pathlib.Path('.FrameworkOne/modules')
-		user_modules_path.mkdir(parents=True, exist_ok=True)
-		state.globals.MODULE_MANAGER = ModulesPathsManager(user_modules_path, modules_path)
-		console_inst = Console(load_keywords())
+		# user_modules_path = pathlib.Path().home() / pathlib.Path('.FrameworkOne/modules')
+		# user_modules_path.mkdir(parents=True, exist_ok=True)
+		console_inst = Console(ModulesPathsManager(modules_path))
 		console_inst.cmdloop()
 	except(KeyboardInterrupt, EOFError):
 		sys.exit()

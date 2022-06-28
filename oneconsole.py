@@ -10,12 +10,12 @@ class ModulesPathsManager:
 	def __init__(self, *modules_paths):
 		self.__modules_paths = modules_paths
 		self.__paths_len = len(self.__modules_paths)
-
+	
 	def __iter__(self):
 		self.__index = 0
 		self.__current_path = self.__modules_paths[0].iterdir()
 		return self
-
+	
 	def __next__(self):
 		ret_mod = None
 		while not ret_mod:
@@ -34,10 +34,10 @@ class ModulesPathsManager:
 					raise StopIteration
 				self.__current_path = self.__modules_paths[self.__index].iterdir()
 		return ret_mod
-
+	
 	def __get_mod_inst(self, path):
-		return importlib.machinery.SourceFileLoader(path.stem, str(path.resolve()))
-
+		return importlib.machinery.SourceFileLoader(path.stem, str(path.resolve())).load_module()
+	
 	# this can raise TypeError or AttibuteError
 	def __validate_mod(self, mod):
 		if not callable(mod.run):
@@ -64,10 +64,13 @@ class Console(cmd.Cmd):
 			'help': self.complete_help,
 			'set': self.complete_set,
 		}
-		self.command_list = None
+		self.keyword_list = []
+		self.keyword_list_len = 0
 		self.keyword_wordlist = []
 		self.terminate_console = False
 		self.mod_manager = mod_manager
+		self.active_module = None
+		self.active_module_regs = None
 	
 	def completenames(self, text, line, begidx, endidx):
 		matches = []
@@ -81,46 +84,62 @@ class Console(cmd.Cmd):
 		words = line.split()
 		keyword_name = words[0]
 		if keyword_name in self.call_dict.keys():
-			self.keyword_wordlist = words[1:]
+			self.keyword_list = words[1:]
 			matches = self.completion_call_dict[keyword_name]()
 		return matches
-
+	
 	def onecmd(self, line):
-		self.command_list = line.split()
-		self.command_list_len = len(self.command_list)
-		if self.command_list_len >= 1:
-			keyword_name = self.command_list[0]
+		command_list = line.split()
+		if len(command_list) >= 1:
+			keyword_name = command_list[0]
+			self.keyword_list = command_list[1:]
+			self.keyword_list_len = len(self.keyword_list)
 			try:
 				self.call_dict[keyword_name]()
 			except KeyError:
 				os.system(line)
 		return self.terminate_console
-
-	# def postcmd(self, stop, line):
-	# 	words = line.split()
-	# 	if not words:
-	# 		return self.terminate_console
-	# 	entered_keyword = words[0]
-	# 	if entered_keyword in self.call_dict.keys():
-	# 		result = self.call_dict[entered_keyword]()
-	# 		if '\n' in result:
-	# 			print(result, end='')
-	# 		elif result:
-	# 			print(result, end='')
-	# 	return self.terminate_console
-
+	
+	def __get_match(self, index=1):
+		try:
+			match = self.keyword_list[index]
+		except IndexError:
+			match = ''
+		return match
+	
 	def complete_use(self, *ignored):
-		print('fsgdfsg')
+		match_str = self.__get_match()
+		matched_mods = []
+		for mod in self.mod_manager:
+			if mod.NAME.startswith(match_str) and mod.NAME not in matched_mods:
+				matched_mods.append(mod.NAME)
+		return matched_mods
 	
 	def use(self):
-		'''Uses a modules'''
-		pass
+		'''Use a module'''
+		try:
+			mod_name = self.keyword_list[0]
+		except IndexError:
+			print('Need a module name')
+		else:
+			for mod in self.mod_manager:
+				if mod.NAME == mod_name:
+					try:
+						# the table is unvalidated, it may be corrupted
+						mod.load_registers()
+						self.active_module_regs = ModulePattern.OneModuleIface.REGISTERS_TABLE
+					except Exception:
+						self.active_module_regs = {}
+					self.active_module = mod
+					break
+			else:
+				print(f'No such module as \'{mod_name}\'')
 	
 	def complete_help(self, *ignored):
 		pass
 	
 	def help(self):
-		'''Displays help about keywords'''
+		'''Display help about keywords'''
 		pass
 	
 	def complete_set(self, *ignored):
@@ -144,13 +163,14 @@ class Console(cmd.Cmd):
 	
 	def registers(self):
 		'''Displays a registers of the active module'''
-		pass
+		
+
 
 if __name__ == '__main__':
 	try:
 		# sys.path.append('..')
-		modules_path = pathlib.Path('modules')
-		# user_modules_path = pathlib.Path().home() / pathlib.Path('.FrameworkOne/modules')
+		modules_path = pathlib.Path('OneModules')
+		# user_modules_path = pathlib.Path().home() / pathlib.Path('.FrameworkOne/OneModules')
 		# user_modules_path.mkdir(parents=True, exist_ok=True)
 		console_inst = Console(ModulesPathsManager(modules_path))
 		console_inst.cmdloop()

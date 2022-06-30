@@ -38,7 +38,7 @@ class ModulesPathsManager:
 	def __get_mod_inst(self, path):
 		return importlib.machinery.SourceFileLoader(path.stem, str(path.resolve())).load_module()
 	
-	# this can raise TypeError or AttibuteError
+	# this may raise TypeError or AttibuteError
 	def __validate_mod(self, mod):
 		if not callable(mod.run):
 			raise TypeError
@@ -52,21 +52,20 @@ class Console(cmd.Cmd):
 		self.prompt = 'frame>'
 		self.call_dict = {
 			'use': self.use,
-			'help': self.help,
-			'set': self.set,
-			'exit': self.exit,
+			'help': self.the_help,
+			'set': self.the_set,
+			'exit': self.the_exit,
 			'run': self.run,
 			'back': self.back,
 			'registers': self.registers
 		}
 		self.completion_call_dict = {
-			'use': self.complete_use,
-			'help': self.complete_help,
-			'set': self.complete_set,
+			'use': self.comp_use,
+			'help': self.compl_help,
+			'set': self.compl_set,
 		}
 		self.keyword_list = []
 		self.keyword_list_len = 0
-		self.keyword_wordlist = []
 		self.terminate_console = False
 		self.mod_manager = mod_manager
 		self.active_module = None
@@ -100,20 +99,23 @@ class Console(cmd.Cmd):
 				os.system(line)
 		return self.terminate_console
 	
-	def __get_match(self, index=1):
+	def __get_match(self, index=0):
 		try:
 			match = self.keyword_list[index]
 		except IndexError:
 			match = ''
 		return match
 	
-	def complete_use(self, *ignored):
+	# FIX THIS
+	# this is not working
+	def comp_use(self, *ignored):
 		match_str = self.__get_match()
 		matched_mods = []
 		for mod in self.mod_manager:
 			if mod.NAME.startswith(match_str) and mod.NAME not in matched_mods:
 				matched_mods.append(mod.NAME)
 		return matched_mods
+			
 	
 	def use(self):
 		'''Use a module'''
@@ -125,45 +127,82 @@ class Console(cmd.Cmd):
 			for mod in self.mod_manager:
 				if mod.NAME == mod_name:
 					try:
-						# the table is unvalidated, it may be corrupted
 						mod.load_registers()
-						self.active_module_regs = ModulePattern.OneModuleIface.REGISTERS_TABLE
-					except Exception:
-						self.active_module_regs = {}
+					except Exception as reg_add_err:
+						print(f'Cloudn\'t validate registers for module: \'{mod.NAME}\' -- {reg_add_err}')
+						ModulePattern.OneModuleIface.clear_regs()				
+					self.active_module_regs = ModulePattern.OneModuleIface.REGS
 					self.active_module = mod
 					break
 			else:
 				print(f'No such module as \'{mod_name}\'')
-	
-	def complete_help(self, *ignored):
+
+	def compl_help(self, *ignored):
 		pass
 	
-	def help(self):
+	def the_help(self):
 		'''Display help about keywords'''
-		pass
+		if self.keyword_list_len <= 0:
+			for method_key, method in self.call_dict.items():
+				print(f'{method_key}: {method.__doc__}')
+		elif self.keyword_list_len >= 1:
+			keyword = self.keyword_list[0]
+			try:
+				print(f'{keyword}: {self.call_dict[keyword].__doc__}')
+			except KeyError:
+				print(f'No such keyword as \'{keyword}\'')
 	
-	def complete_set(self, *ignored):
-		pass
+	def compl_set(self, *ignored):
+		match = self.__get_match()
+		return [ reg[0] for reg in self.active_module_regs if reg[0].startswith(match) ]
 	
-	def set(self):
+	# not working
+	def the_set(self):
 		'''Sets an active module\'s registers'''
-		pass
+		if not self.active_module_regs or not self.active_module:
+			print('Choose a module first')
+		elif self.keyword_list_len <= 0:
+			print('Need a register to set')
+		reg_name = self.keyword_list[0]
+		if self.keyword_list_len == 1:
+			new_reg_val = ''
+		elif self.keyword_list_len >= 2:
+			new_reg_val = ''.join(self.keyword_list[1:])
+		try:
+			self.active_module_regs.update_reg(reg_name, new_value=new_reg_val)
+		except KeyError:
+			print(f'No such register as \'{reg_name}\'')
 	
-	def exit(self):
+	def the_exit(self):
 		'''Exits script'''
-		pass
+		self.terminate_console = True
 	
 	def run(self):
 		'''Runs active module'''
-		pass
-	
+		if not self.active_module:
+			print('Nothing to run')
+		else:
+			try:
+				self.active_module.run()
+			except Exception as module_err:
+				print(module_err)
+
 	def back(self):
 		'''Unsets active module'''
-		pass
+		self.active_module = None
+		self.active_module_regs = None
+		ModulePattern.OneModuleIface.clear_regs()
 	
 	def registers(self):
 		'''Displays a registers of the active module'''
-		
+		if not self.active_module_regs:
+			print('Choose a module first')
+		else:
+			try:
+				for reg_tupl in self.active_module_regs:
+					print(reg_tupl)
+			except Exception as invalid_reg:
+				print(f'Cannot display registers: {invalid_reg}')
 
 
 if __name__ == '__main__':
@@ -175,4 +214,4 @@ if __name__ == '__main__':
 		console_inst = Console(ModulesPathsManager(modules_path))
 		console_inst.cmdloop()
 	except(KeyboardInterrupt, EOFError):
-		sys.exit()
+		sys.exit('\n')

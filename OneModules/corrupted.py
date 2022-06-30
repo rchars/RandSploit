@@ -9,4 +9,4 @@ def run():
 
 
 def load_registers():
-	pass
+	ModulePattern.OneModuleIface.REGS.add_reg('dupa', 'cycek', 'ruchanie')

@@ -1,27 +1,45 @@
-__DEFAULT_REGISTERS_TABLE = {
-	'name': [],
-	'value': [],
-	'description': [],
-	'validator': []
-}
-REGISTERS_TABLE = __DEFAULT_REGISTERS_TABLE
+class Reg:
+	def __init__(self, value, description, validator):
+		self.description = description
+		self.validator = validator
+		self.value = value
 
 
-# Look s horrrible, I ll refactor this later
-def add_reg(name='', value='', description='', validator=None):
-	REGISTERS_TABLE['name'] = name
-	REGISTERS_TABLE['value'] = value
-	REGISTERS_TABLE['description'] = description
-	REGISTERS_TABLE['validator'] = validator
+class Table:
+	def __init__(self):
+		self.__regs = {}
+
+	def add_reg(self, name, value='', description='', validator=None):
+		err = ''
+		if not name:
+			err = 'Need a name'
+		elif name in self.__regs.keys():
+			err = f'Register with name \'{name}\' already exist'
+		if err:
+			raise ValueError(err)
+		self.__regs[name] = Reg(value, description, validator)
+	
+	def update_reg(self, name, new_value=''):
+		if self.__regs[name].validator:
+			self.__regs[name].validator(new_value)
+		self.__regs[name].value = new_value
+
+	def get_reg(self, name):
+		return self.__regs[name]
+	
+	def __iter__(self):
+		self.__iter_regs = iter(self.__regs)
+		return self
+	
+	def __next__(self):
+		reg_name = next(self.__iter_regs)
+		reg = self.__regs[reg_name]
+		return (reg_name, reg.value, reg.description)
 
 
-def update_reg(reg_name, new_value=''):
-	index = REGISTERS_TABLE['names'].index(reg_name)
-	validator = REGISTERS_TABLE['validator'][index]
-	if validator:
-		validator(new_value)
-	REGISTERS_TABLE['value'][index] = new_value
+REGS = Table()
 
 
-def clean_reg_table():
-	REGISTERS_TABLE = __DEFAULT_REGISTERS_TABLE
+def clear_regs():
+	global REGS
+	REGS = Table()

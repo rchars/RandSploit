@@ -1,9 +1,11 @@
-import ModulePattern.OneModuleIface
 import cmd
+import copy
 import importlib.machinery
 import os
 import pathlib
 import sys
+
+import ModulePattern.OneModuleIface
 
 
 class ModulesPathsManager:
@@ -40,10 +42,23 @@ class ModulesPathsManager:
 	
 	# this may raise TypeError or AttibuteError
 	def __validate_mod(self, mod):
-		if not callable(mod.run):
+		if not callable(mod.run) or not callable(mod.load_registers):
 			raise TypeError
 		elif type(mod.NAME) != str:
 			raise TypeError
+
+	def get_mod_by_name(self, name):
+		for mod_dir in self.__modules_paths:
+			for mod_path in mod_dir.iterdir():
+				if mod_path.name.startswith('_') or not mod_path.is_file():
+					continue
+				try:
+					mod = self.__get_mod_inst(mod_path)
+					self.__validate_mod(mod)
+					if mod.NAME == name:
+						return mod
+				except(TypeError, AttributeError):
+					continue
 
 
 class Console(cmd.Cmd):
@@ -57,6 +72,7 @@ class Console(cmd.Cmd):
 			'exit': self.the_exit,
 			'run': self.run,
 			'back': self.back,
+			'modules': self.modules,
 			'registers': self.registers
 		}
 		self.completion_call_dict = {
@@ -106,8 +122,6 @@ class Console(cmd.Cmd):
 			match = ''
 		return match
 	
-	# FIX THIS
-	# this is not working
 	def comp_use(self, *ignored):
 		match_str = self.__get_match()
 		matched_mods = []
@@ -116,7 +130,7 @@ class Console(cmd.Cmd):
 				matched_mods.append(mod.NAME)
 		return matched_mods
 			
-	
+	# NOT WORKING
 	def use(self):
 		'''Use a module'''
 		try:
@@ -124,18 +138,31 @@ class Console(cmd.Cmd):
 		except IndexError:
 			print('Need a module name')
 		else:
-			for mod in self.mod_manager:
-				if mod.NAME == mod_name:
-					try:
-						mod.load_registers()
-					except Exception as reg_add_err:
-						print(f'Cloudn\'t validate registers for module: \'{mod.NAME}\' -- {reg_add_err}')
-						ModulePattern.OneModuleIface.clear_regs()				
-					self.active_module_regs = ModulePattern.OneModuleIface.REGS
-					self.active_module = mod
-					break
+			mod = self.mod_manager.get_mod_by_name(mod_name)
+			try:
+				mod.load_registers()
+			except Exception as reg_add_err:
+				print(f'Cloudn\'t validate registers for module: \'{mod.NAME}\' -- {reg_add_err}')
+				ModulePattern.OneModuleIface.clear_regs()
 			else:
-				print(f'No such module as \'{mod_name}\'')
+				self.active_module_regs = copy.deepcopy(ModulePattern.OneModuleIface.REGS)
+				self.active_module = mod
+				self.prompt = f'frame>{mod.NAME}>'
+		# else:
+		# 	for mod in self.mod_manager:
+		# 		if mod.NAME == mod_name:
+		# 			try:
+		# 				mod.load_registers()
+		# 			except Exception as reg_add_err:
+		# 				print(f'Cloudn\'t validate registers for module: \'{mod.NAME}\' -- {reg_add_err}')
+		# 				ModulePattern.OneModuleIface.clear_regs()				
+		# 			else:
+		# 				self.active_module_regs = ModulePattern.OneModuleIface.REGS
+		# 				self.active_module = mod
+		# 				self.prompt = f'frame>{mod.NAME}>'
+		# 			break
+		# 	else:
+		# 		print(f'No such module as \'{mod_name}\'')
 
 	def compl_help(self, *ignored):
 		pass
@@ -156,7 +183,6 @@ class Console(cmd.Cmd):
 		match = self.__get_match()
 		return [ reg[0] for reg in self.active_module_regs if reg[0].startswith(match) ]
 	
-	# not working
 	def the_set(self):
 		'''Sets an active module\'s registers'''
 		if not self.active_module_regs or not self.active_module:
@@ -191,6 +217,7 @@ class Console(cmd.Cmd):
 		'''Unsets active module'''
 		self.active_module = None
 		self.active_module_regs = None
+		self.prompt = 'frame>'
 		ModulePattern.OneModuleIface.clear_regs()
 	
 	def registers(self):
@@ -203,6 +230,11 @@ class Console(cmd.Cmd):
 					print(reg_tupl)
 			except Exception as invalid_reg:
 				print(f'Cannot display registers: {invalid_reg}')
+
+	def modules(self):
+		'''Display all the avaiable modules'''
+		for mod_index, mod in enumerate(self.mod_manager):
+			print(f'{mod_index}: {mod.NAME}')
 
 
 if __name__ == '__main__':

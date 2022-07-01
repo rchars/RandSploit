@@ -15,4 +15,4 @@ def run():
 	port = ModulePattern.OneModuleIface.get_reg('PORT').value
 	s = socket.socket()
 	s.connect((host, port))
-	s.send(b'walenie w dupe to specjalnosc geja')
+	s.send(b'fidfhvisdhf g;sdfj igsafdhgiposdfhgoidfshuiogdfshig')

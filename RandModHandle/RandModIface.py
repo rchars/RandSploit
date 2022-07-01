@@ -34,7 +34,7 @@ class Table:
 	def __next__(self):
 		reg_name = next(self.__iter_regs)
 		reg = self.__regs[reg_name]
-		return (reg_name, reg.value, reg.description)
+		return (str(reg_name), str(reg.value), str(reg.description))
 
 
 REGS = Table()

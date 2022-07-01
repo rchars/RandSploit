@@ -3,6 +3,7 @@ import socket
 
 NAME = 'NormalModule'
 
+# RandModHandle.RandModIface.REGS.add_reg('fsfs', '', '')
 
 def load_registers():
 	RandModHandle.RandModIface.REGS.add_reg('RHOST', '', 'TARGET')

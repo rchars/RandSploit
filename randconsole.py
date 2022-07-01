@@ -1,5 +1,4 @@
 import cmd
-import copy
 import importlib.machinery
 import os
 import pathlib
@@ -7,6 +6,7 @@ import sys
 import RandModHandle.RandModIface
 
 
+# this must use pyclbr
 class ModulesPathsManager:
 	def __init__(self, *modules_paths):
 		self.__modules_paths = modules_paths
@@ -130,7 +130,7 @@ class Console(cmd.Cmd):
 			if mod.NAME.startswith(match_str) and mod.NAME not in matched_mods:
 				matched_mods.append(mod.NAME)
 		return matched_mods
-			
+
 	def use(self):
 		'''Use a module'''
 		try:
@@ -231,7 +231,7 @@ class Console(cmd.Cmd):
 		else:
 			try:
 				for reg_tupl in self.active_module_regs:
-					print(reg_tupl)
+					print('{:<20} {:<15} {:<10}'.format(*reg_tupl))
 			except Exception as invalid_reg:
 				print(f'Cannot display registers: {invalid_reg}')
 

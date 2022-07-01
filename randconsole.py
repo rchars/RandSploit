@@ -4,8 +4,7 @@ import importlib.machinery
 import os
 import pathlib
 import sys
-
-import ModulePattern.OneModuleIface
+import RandModHandle.RandModIface
 
 
 class ModulesPathsManager:
@@ -143,26 +142,11 @@ class Console(cmd.Cmd):
 				mod.load_registers()
 			except Exception as reg_add_err:
 				print(f'Cloudn\'t validate registers for module: \'{mod.NAME}\' -- {reg_add_err}')
-				ModulePattern.OneModuleIface.clear_regs()
+				RandModHandle.RandModIface.clear_regs()
 			else:
-				self.active_module_regs = copy.deepcopy(ModulePattern.OneModuleIface.REGS)
+				self.active_module_regs = copy.deepcopy(RandModHandle.RandModIface.REGS)
 				self.active_module = mod
 				self.prompt = f'frame>{mod.NAME}>'
-		# else:
-		# 	for mod in self.mod_manager:
-		# 		if mod.NAME == mod_name:
-		# 			try:
-		# 				mod.load_registers()
-		# 			except Exception as reg_add_err:
-		# 				print(f'Cloudn\'t validate registers for module: \'{mod.NAME}\' -- {reg_add_err}')
-		# 				ModulePattern.OneModuleIface.clear_regs()				
-		# 			else:
-		# 				self.active_module_regs = ModulePattern.OneModuleIface.REGS
-		# 				self.active_module = mod
-		# 				self.prompt = f'frame>{mod.NAME}>'
-		# 			break
-		# 	else:
-		# 		print(f'No such module as \'{mod_name}\'')
 
 	def compl_help(self, *ignored):
 		pass
@@ -218,7 +202,7 @@ class Console(cmd.Cmd):
 		self.active_module = None
 		self.active_module_regs = None
 		self.prompt = 'frame>'
-		ModulePattern.OneModuleIface.clear_regs()
+		RandModHandle.RandModIface.clear_regs()
 	
 	def registers(self):
 		'''Displays a registers of the active module'''
@@ -240,7 +224,7 @@ class Console(cmd.Cmd):
 if __name__ == '__main__':
 	try:
 		# sys.path.append('..')
-		modules_path = pathlib.Path('OneModules')
+		modules_path = pathlib.Path('RandMods')
 		# user_modules_path = pathlib.Path().home() / pathlib.Path('.FrameworkOne/OneModules')
 		# user_modules_path.mkdir(parents=True, exist_ok=True)
 		console_inst = Console(ModulesPathsManager(modules_path))

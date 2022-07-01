@@ -1,4 +1,4 @@
-import ModulePattern.OneModuleIface as mo
+import RandModHandle.RandModIface as mo
 
 
 NAME = 'NonCorrupted'

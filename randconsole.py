@@ -26,7 +26,7 @@ class ModulesPathsManager:
 					try:
 						mod = self.__get_mod_inst(mod_path)
 						self.__validate_mod(mod)
-					except(TypeError, AttributeError):
+					except Exception:
 						continue
 					ret_mod = mod
 			except StopIteration:
@@ -58,6 +58,7 @@ class ModulesPathsManager:
 						return mod
 				except(TypeError, AttributeError):
 					continue
+		raise ValueError(f'No such module as \'{name}\'')
 
 
 class Console(cmd.Cmd):
@@ -99,6 +100,7 @@ class Console(cmd.Cmd):
 		keyword_name = words[0]
 		if keyword_name in self.call_dict.keys():
 			self.keyword_list = words[1:]
+			self.keyword_list_len = len(self.keyword_list)
 			matches = self.completion_call_dict[keyword_name]()
 		return matches
 	
@@ -114,7 +116,7 @@ class Console(cmd.Cmd):
 				os.system(line)
 		return self.terminate_console
 	
-	def __get_match(self, index=0):
+	def __get_match(self, index=-1):
 		try:
 			match = self.keyword_list[index]
 		except IndexError:
@@ -129,7 +131,6 @@ class Console(cmd.Cmd):
 				matched_mods.append(mod.NAME)
 		return matched_mods
 			
-	# NOT WORKING
 	def use(self):
 		'''Use a module'''
 		try:
@@ -137,16 +138,21 @@ class Console(cmd.Cmd):
 		except IndexError:
 			print('Need a module name')
 		else:
-			mod = self.mod_manager.get_mod_by_name(mod_name)
 			try:
-				mod.load_registers()
-			except Exception as reg_add_err:
-				print(f'Cloudn\'t validate registers for module: \'{mod.NAME}\' -- {reg_add_err}')
-				RandModHandle.RandModIface.clear_regs()
+				mod = self.mod_manager.get_mod_by_name(mod_name)
+			except ValueError as mod_not_found_err:
+				print(mod_not_found_err)
 			else:
-				self.active_module_regs = copy.deepcopy(RandModHandle.RandModIface.REGS)
-				self.active_module = mod
-				self.prompt = f'frame>{mod.NAME}>'
+				try:
+					RandModHandle.RandModIface.clear_regs()
+					mod.load_registers()
+				except Exception as reg_add_err:
+					print(f'Cloudn\'t validate registers for module: \'{mod.NAME}\' -- {reg_add_err}')
+					RandModHandle.RandModIface.clear_regs()
+				else:
+					self.active_module_regs = RandModHandle.RandModIface.REGS
+					self.active_module = mod
+					self.prompt = f'frame>{mod.NAME}>'
 
 	def compl_help(self, *ignored):
 		pass
@@ -162,27 +168,41 @@ class Console(cmd.Cmd):
 				print(f'{keyword}: {self.call_dict[keyword].__doc__}')
 			except KeyError:
 				print(f'No such keyword as \'{keyword}\'')
-	
+
 	def compl_set(self, *ignored):
+		matches = []
+		if not self.active_module_regs or not self.active_module:
+			return matches
 		match = self.__get_match()
-		return [ reg[0] for reg in self.active_module_regs if reg[0].startswith(match) ]
-	
+		for reg in self.active_module_regs:
+			reg_name = reg[0]
+			if reg_name.startswith(match) and reg_name != match:
+				matches.append(reg_name)
+		return matches
+
 	def the_set(self):
 		'''Sets an active module\'s registers'''
 		if not self.active_module_regs or not self.active_module:
 			print('Choose a module first')
 		elif self.keyword_list_len <= 0:
 			print('Need a register to set')
-		reg_name = self.keyword_list[0]
-		if self.keyword_list_len == 1:
-			new_reg_val = ''
-		elif self.keyword_list_len >= 2:
-			new_reg_val = ''.join(self.keyword_list[1:])
-		try:
-			self.active_module_regs.update_reg(reg_name, new_value=new_reg_val)
-		except KeyError:
-			print(f'No such register as \'{reg_name}\'')
-	
+		else:
+			for reg in self.active_module_regs:
+				reg_name = reg[0]
+				reg_name_list = reg_name.split()
+				reg_name_list_len = len(reg_name_list)
+				if self.keyword_list[0:reg_name_list_len] == reg_name_list:
+					new_value = ' '.join(self.keyword_list[reg_name_list_len:])
+					try:
+						# not sure if it's possible that method'll raise an exception
+						self.active_module_regs.update_reg(reg_name, new_value)
+					except KeyError as reg_update_err:
+						print(reg_update_err)
+					break
+			else:
+				invalid_register_name = ' '.join(self.keyword_list)
+				print(f'No such register as \'{invalid_register_name}\'')
+
 	def the_exit(self):
 		'''Exits script'''
 		self.terminate_console = True

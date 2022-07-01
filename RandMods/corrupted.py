@@ -5,7 +5,7 @@ NAME = 'corrupted'
 
 
 def run():
-	pass
+	print('corrupted working')
 
 
 def load_registers():

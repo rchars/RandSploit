@@ -1,8 +1,8 @@
 class Reg:
 	def __init__(self, value, description, validator):
-		self.description = description
+		self.description = str(description)
 		self.validator = validator
-		self.value = value
+		self.value = str(value)
 
 
 class Table:
@@ -20,7 +20,7 @@ class Table:
 		self.__regs[name] = Reg(value, description, validator)
 	
 	def update_reg(self, name, new_value=''):
-		if self.__regs[name].validator:
+		if callable(self.__regs[name].validator):
 			self.__regs[name].validator(new_value)
 		self.__regs[name].value = new_value
 
@@ -34,7 +34,7 @@ class Table:
 	def __next__(self):
 		reg_name = next(self.__iter_regs)
 		reg = self.__regs[reg_name]
-		return (str(reg_name), str(reg.value), str(reg.description))
+		return (reg_name, reg.value, reg.description)
 
 
 REGS = Table()

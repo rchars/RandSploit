@@ -1,12 +1,11 @@
-import cmd
-import importlib.machinery
-import os
-import pathlib
-import sys
 import RandModHandle.RandModIface
+import importlib.machinery
+import pathlib
+import cmd
+import sys
+import os
 
 
-# this must use pyclbr
 class ModulesPathsManager:
 	def __init__(self, *modules_paths):
 		self.__modules_paths = modules_paths
@@ -22,7 +21,7 @@ class ModulesPathsManager:
 		while not ret_mod:
 			try:
 				mod_path = next(self.__current_path)
-				if not mod_path.name.startswith('_'):
+				if not mod_path.name.startswith('_') and mod_path.is_file():
 					try:
 						mod = self.__get_mod_inst(mod_path)
 						self.__validate_mod(mod)
@@ -36,29 +35,31 @@ class ModulesPathsManager:
 				self.__current_path = self.__modules_paths[self.__index].iterdir()
 		return ret_mod
 	
-	def __get_mod_inst(self, path):
-		return importlib.machinery.SourceFileLoader(path.stem, str(path.resolve())).load_module()
-	
-	# this may raise TypeError or AttibuteError
 	def __validate_mod(self, mod):
-		if not callable(mod.run) or not callable(mod.load_registers):
+		if type(mod.NAME) is not str:
 			raise TypeError
-		elif type(mod.NAME) != str:
+		elif not callable(mod.run):
 			raise TypeError
-
-	def get_mod_by_name(self, name):
+		elif not callable(mod.load_registers):
+			raise TypeError
+	
+	def __get_mod_inst(self, mod_path):
+		return importlib.machinery.SourceFileLoader(mod_path.stem, str(mod_path.resolve())).load_module()
+	
+	def get_mod_by_name(self, mod_name):
 		for mod_dir in self.__modules_paths:
-			for mod_path in mod_dir.iterdir():
-				if mod_path.name.startswith('_') or not mod_path.is_file():
-					continue
+			for possible_mod in mod_dir.iterdir():
 				try:
-					mod = self.__get_mod_inst(mod_path)
+					if not possible_mod.is_file() or possible_mod.name.startswith('_'):
+						continue
+					mod = self.__get_mod_inst(possible_mod)
 					self.__validate_mod(mod)
-					if mod.NAME == name:
+					if mod.NAME == mod_name:
 						return mod
-				except(TypeError, AttributeError):
+				except Exception:
 					continue
-		raise ValueError(f'No such module as \'{name}\'')
+		else:
+			raise ValueError(f'\'{mod_name}\' not found')
 
 
 class Console(cmd.Cmd):
@@ -130,7 +131,7 @@ class Console(cmd.Cmd):
 			if mod.NAME.startswith(match_str) and mod.NAME not in matched_mods:
 				matched_mods.append(mod.NAME)
 		return matched_mods
-
+	
 	def use(self):
 		'''Use a module'''
 		try:
@@ -153,7 +154,7 @@ class Console(cmd.Cmd):
 					self.active_module_regs = RandModHandle.RandModIface.REGS
 					self.active_module = mod
 					self.prompt = f'frame>{mod.NAME}>'
-
+	
 	def compl_help(self, *ignored):
 		pass
 	
@@ -168,7 +169,7 @@ class Console(cmd.Cmd):
 				print(f'{keyword}: {self.call_dict[keyword].__doc__}')
 			except KeyError:
 				print(f'No such keyword as \'{keyword}\'')
-
+	
 	def compl_set(self, *ignored):
 		matches = []
 		if not self.active_module_regs or not self.active_module:
@@ -179,7 +180,7 @@ class Console(cmd.Cmd):
 			if reg_name.startswith(match) and reg_name != match:
 				matches.append(reg_name)
 		return matches
-
+	
 	def the_set(self):
 		'''Sets an active module\'s registers'''
 		if not self.active_module_regs or not self.active_module:
@@ -196,13 +197,14 @@ class Console(cmd.Cmd):
 					try:
 						# not sure if it's possible that method'll raise an exception
 						self.active_module_regs.update_reg(reg_name, new_value)
+						print(f'{reg_name} => {new_value}')
 					except KeyError as reg_update_err:
 						print(reg_update_err)
 					break
 			else:
 				invalid_register_name = ' '.join(self.keyword_list)
 				print(f'No such register as \'{invalid_register_name}\'')
-
+	
 	def the_exit(self):
 		'''Exits script'''
 		self.terminate_console = True
@@ -216,7 +218,9 @@ class Console(cmd.Cmd):
 				self.active_module.run()
 			except Exception as module_err:
 				print(module_err)
-
+			except KeyboardInterrupt:
+				print()
+	
 	def back(self):
 		'''Unsets active module'''
 		self.active_module = None
@@ -224,6 +228,7 @@ class Console(cmd.Cmd):
 		self.prompt = 'frame>'
 		RandModHandle.RandModIface.clear_regs()
 	
+	# not done yet
 	def registers(self):
 		'''Displays a registers of the active module'''
 		if not self.active_module_regs:
@@ -234,7 +239,7 @@ class Console(cmd.Cmd):
 					print('{:<20} {:<15} {:<10}'.format(*reg_tupl))
 			except Exception as invalid_reg:
 				print(f'Cannot display registers: {invalid_reg}')
-
+	
 	def modules(self):
 		'''Display all the avaiable modules'''
 		for mod_index, mod in enumerate(self.mod_manager):

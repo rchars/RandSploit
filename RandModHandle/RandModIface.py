@@ -18,7 +18,7 @@ class Table:
 		if err:
 			raise ValueError(err)
 		self.__regs[name] = Reg(value, description, validator)
-	
+
 	def update_reg(self, name, new_value=''):
 		if callable(self.__regs[name].validator):
 			self.__regs[name].validator(new_value)
@@ -26,11 +26,11 @@ class Table:
 
 	def get_reg(self, name):
 		return self.__regs[name]
-	
+
 	def __iter__(self):
 		self.__iter_regs = iter(self.__regs)
 		return self
-	
+
 	def __next__(self):
 		reg_name = next(self.__iter_regs)
 		reg = self.__regs[reg_name]

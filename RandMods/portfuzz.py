@@ -4,6 +4,7 @@ import time
 
 
 NAME = 'PORT_FUZZ'
+DESCRIPTION = 'simple port fuzzer'
 
 
 def load_registers():

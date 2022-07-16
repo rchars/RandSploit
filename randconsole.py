@@ -16,17 +16,16 @@ class KeywordHandler:
 		self.keyword_list_len = 0
 		self.terminate_console = False
 		self.mod_manager = mod_manager
-		self.modules_num_cache = {}
 		self.active_module = None
 		self.active_module_regs = None
-
+	
 	def __get_match(self, index=-1):
 		try:
 			match = self.keyword_list[index]
 		except IndexError:
 			match = ''
 		return match
-
+	
 	def compl_use(self):
 		match_str = self.__get_match()
 		matched_mods = []
@@ -34,7 +33,7 @@ class KeywordHandler:
 			if mod.NAME.startswith(match_str) and mod.NAME not in matched_mods:
 				matched_mods.append(mod.NAME)
 		return matched_mods
-
+	
 	# what if module name is a digit
 	def keyword_use(self):
 		'''Use a module'''
@@ -54,19 +53,13 @@ class KeywordHandler:
 					self.active_module_regs = RandModHandle.RandModIface.REGS
 					self.active_module = mod
 					self.prompt = f'frame>{mod.NAME}>'
-			if mod_name.isdigit():
-				try:
-					activate_mod(self.modules_num_cache[int(mod_name)])
-				except KeyError:
-					print(f'No such module as \'{mod_name}\'')
+			try:
+				mod = self.mod_manager.get_mod(mod_name)
+			except ValueError as mod_not_found_err:
+				print(mod_not_found_err)
 			else:
-				try:
-					mod = self.mod_manager.get_mod_by_name(mod_name)
-				except ValueError as mod_not_found_err:
-					print(mod_not_found_err)
-				else:
-					activate_mod(mod)
-
+				activate_mod(mod)
+	
 	def compl_set(self):
 		matches = []
 		if not self.active_module_regs or not self.active_module:
@@ -101,7 +94,7 @@ class KeywordHandler:
 			else:
 				invalid_register_name = ' '.join(self.keyword_list)
 				print(f'No such register as \'{invalid_register_name}\'')
-
+	
 	def keyword_exit(self):
 		'''Exits script'''
 		self.terminate_console = True
@@ -117,14 +110,14 @@ class KeywordHandler:
 				print(module_err)
 			except KeyboardInterrupt:
 				print()
-
+	
 	def keyword_back(self):
 		'''Unsets active module'''
 		self.active_module = None
 		self.active_module_regs = None
 		self.prompt = 'frame>'
 		RandModHandle.RandModIface.clear_regs()
-
+	
 	# not done yet
 	def keyword_registers(self):
 		'''Displays a registers of the active module'''
@@ -135,7 +128,7 @@ class KeywordHandler:
 				self.print_table(RandSploitModules.RegisterManager.RegisterManagerWrapper(self.active_module_regs))
 			except Exception as invalid_reg:
 				print(f'Cannot display registers: {invalid_reg}')
-
+	
 	def keyword_modules(self):
 		'''Display all the avaiable modules'''
 		self.print_table(RandSploitModules.ModulePathManager.TableWrapper(self.mod_manager))
@@ -163,14 +156,14 @@ class Console(cmd.Cmd):
 		for met in inspect.getmembers(self.keyword_handler, predicate=inspect.ismethod):
 			if met[0].startswith('keyword'): self.handler_calldict[met[0][8:]] = met[1]
 			elif met[0].startswith('compl'): self.handler_compldict[met[0][6:]] = met[1]
-
+	
 	def completenames(self, text, line, begidx, endidx):
 		matches = []
 		for keyword_name in self.handler_calldict.keys():
 			if keyword_name.startswith(line.lower()):
 				matches.append(keyword_name)
 		return matches
-
+	
 	def completedefault(self, text, line, *ignored):
 		matches = []
 		words = line.split()
@@ -180,7 +173,7 @@ class Console(cmd.Cmd):
 			self.keyword_handler.keyword_list_len = len(self.keyword_handler.keyword_list)
 			matches = self.handler_compldict[keyword_name]()
 		return matches
-
+	
 	def onecmd(self, line):
 		command_list = line.split()
 		if len(command_list) >= 1:
@@ -198,8 +191,8 @@ class Console(cmd.Cmd):
 if __name__ == '__main__':
 	try:
 		modules_path = pathlib.Path('RandMods')
-		# user_modules_path = pathlib.Path().home() / pathlib.Path('.FrameworkOne/OneModules')
-		# user_modules_path.mkdir(parents=True, exist_ok=True)
+		user_modules_path = pathlib.Path().home() / pathlib.Path('.FrameworkOne/OneModules')
+		user_modules_path.mkdir(parents=True, exist_ok=True)
 		console_inst = Console(RandSploitModules.ModulePathManager.ModulePathManager(modules_path))
 		console_inst.cmdloop()
 	except(KeyboardInterrupt, EOFError):

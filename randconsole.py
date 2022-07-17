@@ -1,5 +1,5 @@
-import RandSploitModules.ModulePathManager
-import RandSploitModules.RegisterManager
+import RandModHandle.ModulePathManager
+import RandModHandle.RegisterManager
 import RandModHandle.RandModIface
 import itertools
 import inspect
@@ -34,7 +34,6 @@ class KeywordHandler:
 				matched_mods.append(mod.NAME)
 		return matched_mods
 	
-	# what if module name is a digit
 	def keyword_use(self):
 		'''Use a module'''
 		try:
@@ -70,7 +69,7 @@ class KeywordHandler:
 			if reg_name.startswith(match) and reg_name != match:
 				matches.append(reg_name)
 		return matches
-
+	
 	def keyword_set(self):
 		'''Sets an active module\'s registers'''
 		if not self.active_module_regs or not self.active_module:
@@ -85,7 +84,6 @@ class KeywordHandler:
 				if self.keyword_list[0:reg_name_list_len] == reg_name_list:
 					new_value = ' '.join(self.keyword_list[reg_name_list_len:])
 					try:
-						# not sure if it's possible that method'll raise an exception
 						self.active_module_regs.update_reg(reg_name, new_value)
 						print(f'{reg_name} => {new_value}')
 					except KeyError as reg_update_err:
@@ -118,20 +116,19 @@ class KeywordHandler:
 		self.prompt = 'frame>'
 		RandModHandle.RandModIface.clear_regs()
 	
-	# not done yet
 	def keyword_registers(self):
 		'''Displays a registers of the active module'''
 		if not self.active_module_regs:
 			print('Choose a module first')
 		else:
 			try:
-				self.print_table(RandSploitModules.RegisterManager.RegisterManagerWrapper(self.active_module_regs))
+				self.print_table(RandModHandle.RegisterManager.RegisterManagerWrapper(self.active_module_regs))
 			except Exception as invalid_reg:
 				print(f'Cannot display registers: {invalid_reg}')
 	
 	def keyword_modules(self):
 		'''Display all the avaiable modules'''
-		self.print_table(RandSploitModules.ModulePathManager.TableWrapper(self.mod_manager))
+		self.print_table(RandModHandle.ModulePathManager.TableWrapper(self.mod_manager))
 	
 	def print_table(self, table_obj):
 		lenghts = []
@@ -191,9 +188,9 @@ class Console(cmd.Cmd):
 if __name__ == '__main__':
 	try:
 		modules_path = pathlib.Path('RandMods')
-		user_modules_path = pathlib.Path().home() / pathlib.Path('.FrameworkOne/OneModules')
+		user_modules_path = pathlib.Path().home() / pathlib.Path('.RandSploit/RandModules')
 		user_modules_path.mkdir(parents=True, exist_ok=True)
-		console_inst = Console(RandSploitModules.ModulePathManager.ModulePathManager(modules_path))
+		console_inst = Console(RandModHandle.ModulePathManager.ModulePathManager(modules_path))
 		console_inst.cmdloop()
 	except(KeyboardInterrupt, EOFError):
 		sys.exit('\n')

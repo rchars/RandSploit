@@ -88,6 +88,8 @@ class KeywordHandler:
 						print(f'{reg_name} => {new_value}')
 					except KeyError as reg_update_err:
 						print(reg_update_err)
+					except Exception as validator_err:
+						print(validator_err)
 					break
 			else:
 				invalid_register_name = ' '.join(self.keyword_list)

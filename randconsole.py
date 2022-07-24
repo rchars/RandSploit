@@ -189,7 +189,7 @@ class Console(cmd.Cmd):
 
 if __name__ == '__main__':
 	try:
-		modules_path = pathlib.Path('RandMods')
+		modules_path = pathlib.Path(__file__).resolve().parent / pathlib.Path('RandMods')
 		user_modules_path = pathlib.Path().home() / pathlib.Path('.RandSploit/RandModules')
 		user_modules_path.mkdir(parents=True, exist_ok=True)
 		console_inst = Console(RandModHandle.ModulePathManager.ModulePathManager(modules_path))

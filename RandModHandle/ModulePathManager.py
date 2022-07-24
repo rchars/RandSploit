@@ -42,8 +42,9 @@ class ModulePathManager:
 		return importlib.machinery.SourceFileLoader(mod_path.stem, str(mod_path.resolve())).load_module()
 	
 	def get_mod(self, mod_name):
+		mod_index = 0
 		for mod_dir in self.modules_paths:
-			for mod_index, possible_mod in enumerate(mod_dir.iterdir()):
+			for possible_mod in mod_dir.iterdir():
 				try:
 					if not possible_mod.is_file() or possible_mod.name.startswith('_'):
 						continue
@@ -53,6 +54,8 @@ class ModulePathManager:
 						return mod
 				except Exception:
 					continue
+				else:
+					mod_index += 1
 		else:
 			raise ValueError(f'\'{mod_name}\' not found')
 

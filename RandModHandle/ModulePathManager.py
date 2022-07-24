@@ -42,7 +42,7 @@ class ModulePathManager:
 		return importlib.machinery.SourceFileLoader(mod_path.stem, str(mod_path.resolve())).load_module()
 	
 	def get_mod(self, mod_name):
-		mod_index = 0
+		mod_index = 1
 		for mod_dir in self.modules_paths:
 			for possible_mod in mod_dir.iterdir():
 				try:

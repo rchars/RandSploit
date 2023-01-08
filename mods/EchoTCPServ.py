@@ -40,23 +40,31 @@ class Mod(modiface.ModInterface):
 		try:
 			end_thread = False
 			while not end_thread:
-				data = b''
+				data = ''
+				buff = ''
+				eol_index = None
 				end_loop = False
 				while not end_loop:
-					buff = client_sock.recv(1024)
-					if buff[-1:] == b'\n':
-						end_loop = True
-					elif buff == b'':
+					if not buff:
+						buff = client_sock.recv(1024).decode()
+					if buff == '':
 						end_thread = True
+						break
+					eol_index = buff.find('\n')
+					if eol_index == -1:
+						eol_index = 1023
+					else:
 						end_loop = True
-					data += buff
-				self.time_print(f'{client_info[0]}:{client_info[1]}>{data.decode()}', 	eol='')
-				client_sock.send(b'EchoTCP:' + data)
+					data += buff[:eol_index + 1]
+					buff = buff[eol_index + 1:]
+				if data:
+					self.time_print(f'{client_info[0]}:{client_info[1]}>{data}', eol='')
+					client_sock.send(b'EchoTCP:' + data.encode())
 		except socket.timeout:
-			self.time_print(f'{client_info} disconnnected (timeout)')
+			self.time_print(f'{client_info[0]}:{client_info[1]} disconnected (timeout)')
 			client_sock.close()
 		else:
-			self.time_print(f'{client_info} disconnected')
+			self.time_print(f'{client_info[0]}:{client_info[1]} disconnected')
 
 	def time_print(self, data, eol='\n'):
 		current_time = datetime.datetime.now()

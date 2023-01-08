@@ -1,5 +1,4 @@
 import importlib.machinery as my
-from inspect import trace
 import pathlib as pb
 import traceback
 import randstate
@@ -151,11 +150,14 @@ class Interpreter(cmd.Cmd):
 		if self.active_module is None:
 			print('Choose a mod first')
 		else:
-			try:	
+			try:
 				modiface.check_required()
-				self.active_module.run()
-			except Exception:
-				traceback.print_exc()
+				try:
+					self.active_module.run()
+				except Exception:
+					traceback.print_exc()
+			except Exception as valid_err:
+				print(valid_err)
 			except(KeyboardInterrupt, EOFError):
 				print()
 
@@ -233,9 +235,4 @@ if __name__ == '__main__':
 # ModulePathManager class
 # Interpreter class
 # Interface for modules
-# Modules, I'll be learing network stuff on this frame
-# I need:
-#	Email automation module
-#	Web table scrapper
-#	General Data Manager
-#	SSL Certfile Generator
+# Fix everything

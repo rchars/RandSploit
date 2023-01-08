@@ -79,3 +79,7 @@ def check_required():
 			options_not_set.append(option.name)
 	if options_not_set:
 		raise ValueError('{} must be set'.format(','.join(options_not_set)))
+
+
+#TODO:
+# Add multitype option

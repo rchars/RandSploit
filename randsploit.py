@@ -126,6 +126,26 @@ class Interpreter(cmd.Cmd):
 			print(real_print_str)
 		print(real_tabular_str)
 
+	def do_validate(self, line):
+		tokens = line.replace(' ', '').lower().split(',')
+		tokens_len = len(tokens)
+		if tokens_len == 0:
+			print('Need mod index')
+			return False
+		validate_all = False
+		indexes = list()
+		if tokens_len != 1:
+			for token in tokens:
+				try:
+					indexes.append(int(token))
+				except ValueError:
+					print('No such mod as \'{token}\'')
+		if tokens_len == 1 and tokens[0].startswith('all'):
+			validate_all = True
+		for mod_path in self.mod_path_manager:
+			try:
+				
+
 	def do_options(self, line):
 		if self.active_module is None:
 			print('Choose a module first')

@@ -1,8 +1,9 @@
+import Option.ModOptionsWrapper
 import importlib.machinery
 import pathlib
 
 
-class ModPathManager:
+class __ModPathManager:
 	def __init__(self, *mod_locations):
 		self.locations = mod_locations
 		self.using_index = None
@@ -49,29 +50,40 @@ class ModPathManager:
 
 class ModManager:
 	def __init__(self, *mod_locations):
-		self.mod_path_manager = ModPathManager(mod_locations)
+		self.mod_path_manager = __ModPathManager(mod_locations)
 		self.active_mod = None
 
-	def use_mod(self, mod_id):
+	def roll_mod(self, mod_id):
 		mod_path = self.mod_path_manager[mod_id]
 		mod_inst = importlib.machinery.SourceFileLoader(mod_path.stem, path=str(mod_path.resolve().parent / pathlib.Path('mods')))
 		# self.validate_mod(mod_inst)
-		self.active_mod = mod_inst
-
+		self.active_mod = Option.ModOptionsWrapper.ModOptionsWrapper(mod_inst.Mod())
+			
 	def unroll_mod(self):
 		self.active_mod = None
 		
 	# use aganist active_mod
 	def run_mod(self):
-		pass
+		self.active_mod.mod_inst.run()
 	
 	# use aganist active_mod
-	def get_mod_opts(self):
-		pass
+	def iter_mod_opts(self):
+		return iter(self.active_mod)
+
+	def get_mod_opt(self, opt_name):
+		return self.active_mod[opt_name]
 
 	# kwargs is dict opt_name=new_value
-	def set_mod_opts(self, **kwargs):
-		pass
+	def set_mod_opt(self, opt_name, new_value):
+		for opt in self.get_mod_opts():
+			if opt.name == opt_name:
+				if callable(opt.validator) == opt_name:
+					if callable(opt.validator):
+						opt.validator(new_value)
+					opt.value = new_value
+					break
+		else:
+			raise ValueError(f'No such opt as \'{opt_name}\'')
 
 	def iter_mods(self):
-		return self.mod_path_manager
+		return iter(self.mod_path_manager)

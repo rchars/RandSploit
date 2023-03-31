@@ -1,6 +1,14 @@
-class Option:
-	def __init__(self, name, descr='', value='', validator=None):
-		self.name = name
-		self.descr = descr
-		self.value = value
-		self.validator = validator
+import OptionInterface.OptionInterface as oi
+
+
+class DefaultOpt(oi.OptionInterface):
+	def __init__(self, name, value='', descr=''):
+		super().__init__(name, value, descr)
+
+
+class ValidatedOpt(oi.OptionInterface):
+	def __init__(self, name, value, descr, validator):
+		if callable(validator):
+			def set_value(new_value): validator(new_value)
+			self.set_value = set_value
+		super().__init__(name, value, descr)

@@ -1,9 +1,9 @@
-import Interpreter
+import Interpreter.interpreter
 import sys
 
 
 if __name__ == '__main__':
 	try:
-		Interpreter.Interpreter.start_interpreter()
+		Interpreter.interpreter.start_interpreter()
 	except(KeyboardInterrupt, EOFError):
-		sys.exit()
+		sys.exit('\n')

@@ -1,4 +1,5 @@
-import modiface
+import ModInterface.ModInterface as modiface
+import Option.Option as opt
 import socket
 import time
 
@@ -6,22 +7,18 @@ import time
 
 class Mod(modiface.ModInterface):
 	def __init__(self):
-		super().__init__(prompt='EchoTCP>')
-		modiface.add_option(modiface.Option('RHOST', '', 'Target host', required=True))
-		modiface.add_option(modiface.CastOption('RPORT', '', 'Target port', int))
-		modiface.add_option(modiface.CastOption('SEND_DELAY', 3.5, 'Delay before next send', float))
-		modiface.add_option(modiface.CastOption('TIMEOUT', 5.5, 'Timeout before disconnecting', float))
-		modiface.add_option(modiface.Option('PING_STR', 'Echo TCP', 'Message to send', required=False))
+		super().__init__('EchoTCP>')
+		self.rport = opt.ValidatedOpt('RPORT', '', 'Target port', int)
+		self.rhost = opt.DefaultOpt('RHOST', '', 'Target host', required=True)
+		# what about negative floats ??
+		self.send_delay = opt.ValidatedOpt('SEND_DELAY', 3.5, 'Delay before next send', float)
+		self.timeout = opt.ValidatedOpt('TIMEOUT', 5.5, 'Timeout before disconnecting', float)
+		self.send_message = opt.DefaultOpt('PING_STR', 'Echo TCP', 'Message to send')
 
 	def run(self):
-		rhost = modiface.get_option_val('RHOST')
-		rport = modiface.get_option_val('RPORT')
-		timeout = modiface.get_option_val('TIMEOUT')
-		send_delay = modiface.get_option_val('SEND_DELAY')
-		send_message = modiface.get_option_val('PING_STR')
 		while True:
 			try:
-				s = socket.create_connection((rhost, rport), timeout=timeout)
+				s = socket.create_connection((self.rhost, self.rport), timeout=self.timeout)
 				s.send(f'{send_message}\n'.encode())
 				for buff in self.recv_till_sep(s):
 					print(buff, end='')
@@ -32,7 +29,7 @@ class Mod(modiface.ModInterface):
 			except UnboundLocalError:
 				pass
 			time.sleep(send_delay)
-	
+
 	def recv_till_sep(self, s):
 		end_recv = False
 		seps = ('\n', '\r\n')

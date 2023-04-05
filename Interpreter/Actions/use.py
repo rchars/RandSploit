@@ -7,4 +7,9 @@ class Action(ai.ActionInterface):
 		if not tokens:
 			print('Use what ?')
 		else:
-			state.STATE.active_mod = state.STATE.get_action_mod(tokens[0])
+			state.STATE.active_mod = state.STATE.get_module_by_id(tokens[0])
+
+	# Not sure about the tokens parameter
+	# The parameter will be path for sure
+	def complete(self, tokens):
+		pass

@@ -20,7 +20,21 @@ class State:
 		if pathlib.Path(action_name).is_file():
 			self.get_module_by_path(action_name)
 
-	def get_module_by_path(self, mod_path): return machinery.SourceFileLoader(mod_path.name, str(mod_path)).load_module()
+	# method unoptimized, need to refactor
+	def get_module_by_id(self, mod_id):
+		# try casting to int, if casting will not work, then search by path
+		try:
+			mod_id = int(mod_id)
+		except Exception:
+			mod_id = pathlib.Path(mod_id)
+		for mod_index, mod_path in self.iter_mods():
+			if mod_index == mod_id or mod_path == mod_id:
+				return self.get_module_by_path(mod_path)
+		else:
+			raise FileNotFoundError(f'No such module as \'{mod_id}\'')
+
+	def get_module_by_path(self, mod_path):
+		return machinery.SourceFileLoader(mod_path.name, str(mod_path)).load_module()
 
 	def get_action_mod(self, action_mod_stem):
 		return self.get_module_by_path(self._action_dir / pathlib.Path(f'{action_mod_stem}.py'))
@@ -75,10 +89,13 @@ class State:
 		return self._active_mod
 
 	@active_mod.setter
-	def active_mod(self, mod_id):
-		mod_path = self.search_mods(mod_id)
-		mod = self.get_module_by_path(mod_path)
+	def active_mod(self, mod):
+		# mod_path = self.search_mods(mod_id)
+		# mod = self.get_module_by_path(mod_path)
+		# self._prompt = self._active_mod.name
 		self._active_mod = mod.Mod()
+		# This may be a problem
+		self._prompt = mod.Mod().mod_name
 
 	@property
 	def exit(self):

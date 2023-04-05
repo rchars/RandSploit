@@ -2,8 +2,8 @@ import OptionInterface.OptionInterface as oi
 
 
 class DefaultOpt(oi.OptionInterface):
-	def __init__(self, name, value='', descr=''):
-		super().__init__(name, value, descr)
+	def __init__(self, name, value='', descr='', required=False):
+		super().__init__(name, value, descr, required)
 
 
 class ValidatedOpt(oi.OptionInterface):

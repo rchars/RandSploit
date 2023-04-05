@@ -7,18 +7,35 @@ class InterpreterCompleter:
 	possible_completions = None
 
 	# not finished yet
+	# if splitted text is > 1 then create the non-failure
 	def complete(self, text, index):
+		# if self.possible_completions is None:
+		# 	self.possible_completions = list()
+		# 	for action_mod in state.STATE.iter_actions():
+		# 		if action_mod.stem.startswith(text):
+		# 			self.possible_completions.append(action_mod.stem)
+		# try:
+		# 	return self.possible_completions[index]
+		# except IndexError:
+		# 	self.possible_completions = None
+		# 	return None
 		if self.possible_completions is None:
 			self.possible_completions = list()
 			for action_mod in state.STATE.iter_actions():
 				if action_mod.stem.startswith(text):
 					self.possible_completions.append(action_mod.stem)
+		tokens = text.split()
+		if len(tokens) < 1:
+			try:
+				return self.possible_completions[index]
+			except IndexError:
+				self.possible_completions = None
+				return None
 		try:
-			return self.possible_completions[index]
-		except IndexError:
-			self.possible_completions = None
-			return None
-
+			mod = state.STATE.get_action_mod(tokens[0])
+			return mod.complete(tokens[1:])
+		except Exception:
+			pass
 
 def start_interpreter():
 	completer_instance = InterpreterCompleter()

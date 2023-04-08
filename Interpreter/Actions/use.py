@@ -3,13 +3,11 @@ import Interpreter.state as state
 
 
 class Action(ai.ActionInterface):
-	def execute(self, tokens):
-		if not tokens:
+	def execute(self, text):
+		if not text:
 			print('Use what ?')
 		else:
-			state.STATE.active_mod = state.STATE.get_module_by_id(tokens[0])
+			state.STATE.active_mod = state.STATE.get_module_by_id(text)
 
-	# Not sure about the tokens parameter
-	# The parameter will be path for sure
-	def complete(self, tokens):
+	def complete(self, text):
 		pass

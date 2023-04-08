@@ -3,7 +3,7 @@ import Interpreter.state as state
 
 
 class Action(ai.ActionInterface):
-	def execute(self, tokens):
+	def execute(self):
 		if not state.STATE.is_mod_selected():
 			print('Select mod before executing')
 		else:

@@ -1,6 +1,7 @@
 import OptionInterface.OptionInterface as option_iface
 import importlib.machinery as machinery
 import Interpreter.state
+import collections
 import inspect
 import pathlib
 
@@ -10,19 +11,20 @@ class State:
 		self._exit = False
 		self._prompt = 'rand>'
 		self._active_mod = None
+		self._tabefmt = 'fancy_grid'
 		# try to use property
 		self._mod_locations = [
 			pathlib.Path(__file__).parents[1] / pathlib.Path('Mods')
 		]
 		self._action_dir = pathlib.Path(__file__).parent / pathlib.Path('Actions')
+		self._ModTuple = collections.namedtuple('ModTuple', 'mod_index mod_path')
 
 	def get_action(self, action_name):
 		if pathlib.Path(action_name).is_file():
 			self.get_module_by_path(action_name)
 
-	# method unoptimized, need to refactor
+	# method not optimized, need to refactor
 	def get_module_by_id(self, mod_id):
-		# try casting to int, if casting will not work, then search by path
 		try:
 			mod_id = int(mod_id)
 		except Exception:
@@ -44,16 +46,12 @@ class State:
 			return False
 		return True
 
-	# mod_id is mod index or regex
-	def search_mods(self, mod_id):
-		pass
-
+	# ugly implementation, rewrite it on refactor branch
 	def iter_mods(self):
 		counter = 0
-		# ugly implementation, rewrite it on refactor branch
 		for mod_dir in self._mod_locations:
 			for mod_path in mod_dir.iterdir():
-				yield counter, mod_path
+				yield self._ModTuple(counter, mod_path)
 				counter += 1
 
 	def iter_opts(self):
@@ -69,20 +67,16 @@ class State:
 		for action_mod in self._action_dir.iterdir():
 			yield action_mod
 
-	# i'll do it later
-	def search_actions(self, regex):
-		pass
-
 	@property
 	def prompt(self):
 		return self._prompt
 
 	@prompt.setter
-	def prompt(self):
+	def prompt(self, new_prompt):
 		if not self.is_mod_selected():
 			self._prompt = 'rand>'
 		else:
-			self._prompt = self.active_mod.name
+			self._prompt = new_prompt
 
 	@property
 	def active_mod(self):
@@ -90,12 +84,12 @@ class State:
 
 	@active_mod.setter
 	def active_mod(self, mod):
-		# mod_path = self.search_mods(mod_id)
-		# mod = self.get_module_by_path(mod_path)
-		# self._prompt = self._active_mod.name
 		self._active_mod = mod.Mod()
-		# This may be a problem
-		self._prompt = mod.Mod().mod_name
+		try:
+			new_prompt = f'{self._active_mod.mod_name}>'
+		except AttributeError:
+			new_prompt = pathlib.Path(mod.__file__).stem + '>'
+		self._prompt = new_prompt
 
 	@property
 	def exit(self):
@@ -107,5 +101,11 @@ class State:
 			raise TypeError('exit must be bool')
 		self._exit = exit
 
+	@property
+	def tablefmt(self):
+		return self._tablefmt
+
+	# @tablefmt.setter
+	# def tablefmt(self, new_table):
 
 state.STATE = State()

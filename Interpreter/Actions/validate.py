@@ -4,7 +4,7 @@ import Interpreter.state as state
 
 class Action(ai.ActionInterface):
 	def execute(self, tokens):
-		print('The tokens should be a group of regex and nothing more')
+		pass
 
 	def complete(self, tokens):
 		pass

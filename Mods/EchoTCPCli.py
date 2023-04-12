@@ -8,17 +8,17 @@ import time
 class Mod(modiface.ModInterface):
 	def __init__(self):
 		super().__init__('EchoTCP>')
-		self.rport = opt.ValidatedOpt('RPORT', '', 'Target port', int)
-		self.rhost = opt.DefaultOpt('RHOST', '', 'Target host', required=True)
+		self.rport = opt.ValidatedOpt('RPORT', descr='Target port', validator=int)
+		self.rhost = opt.DefaultOpt('RHOST', descr='Target host', required=True)
 		# what about negative floats ??
-		self.send_delay = opt.ValidatedOpt('SEND_DELAY', 3.5, 'Delay before next send', float)
-		self.timeout = opt.ValidatedOpt('TIMEOUT', 5.5, 'Timeout before disconnecting', float)
+		self.send_delay = opt.ValidatedOpt('SEND_DELAY', 3.5, 'Delay before next send', validator=float)
+		self.timeout = opt.ValidatedOpt('TIMEOUT', 5.5, 'Timeout before disconnecting', validator=float)
 		self.send_message = opt.DefaultOpt('PING_STR', 'Echo TCP', 'Message to send')
 
 	def run(self):
 		while True:
 			try:
-				s = socket.create_connection((self.rhost, self.rport), timeout=self.timeout)
+				s = socket.create_connection((self.rhost.value, self.rport.value), timeout=self.timeout.value)
 				s.send(f'{send_message}\n'.encode())
 				for buff in self.recv_till_sep(s):
 					print(buff, end='')
@@ -35,7 +35,6 @@ class Mod(modiface.ModInterface):
 		seps = ('\n', '\r\n')
 		while not end_recv:
 			buff = s.recv(1024).decode()
-			print(buff)
 			if buff[-1] in seps:
 				end_recv = True
 			yield buff

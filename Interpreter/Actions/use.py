@@ -7,7 +7,12 @@ class Action(ai.ActionInterface):
 		if not text:
 			print('Use what ?')
 		else:
-			state.STATE.active_mod = state.STATE.get_module_by_id(text)
+			try:
+				mod_id = int(text)
+			except ValueError:
+				# regex
+				mod_id = text
+			state.MOD_STATE.active_mod = mod_id
 
 	def complete(self, text):
 		pass

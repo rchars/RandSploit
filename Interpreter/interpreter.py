@@ -5,7 +5,6 @@ import readline
 import inspect
 
 
-
 PREP_LINE = collections.namedtuple('PrepLine', ['action_name', 'text'])
 
 
@@ -22,40 +21,34 @@ def prepare_line(text):
 
 
 class Completer:
-	possible_completions = None
-	possible_completions_len = None
+	completions = None
+	fulltext = ''
 
 	def complete(self, text, index):
-		prep_line = prepare_line(text)
-		action_mod_stem = prep_line.action_name
-		action_completion_text = prep_line.text
-		self.set_actions(action_mod_stem)
+		if self.completions == None:
+			prep_line = prepare_line(readline.get_line_buffer())
+			self.set_actions(prep_line.action_name)
+			if len(self.completions) == 1 and self.completions[0] == prep_line.action_name:
+				# the function should return None in case of failure
+				# żadne mod_inst, to będzie call_action_completer z nowej klasy
+				# action_inst = state.STATE.get_action_mod(prep_line.action_name).Action()
+				# if len(inspect.signature(action_inst.complete).parameters) >= 1:
+				# 	self.completions = action_inst.complete(prep_line.text)
+				# else:
+				# 	self.completions = action_inst.complete()
+				self.completions = state.ACTION_STATE.call_action_completer(prep_line.action_name, prep_line.action_arg_text)
 		try:
-			if self.possible_completions_len == 1 and self.possible_completions[0] == action_mod_stem:
-				try:
-					action_mod_inst = state.STATE.get_action_mod().Action()
-					arg_num = len(inspect.getfullargspec(action_mod_inst.complete).args)
-					if arg_num >= 1:
-						return action_mod_inst.comlete(action_completion_text)
-					return action_mod_inst.complete()
-				except InstanceError:
-					pass
-				except Exception:
-					pass
-				finally:
-					return None
-			else:
-				return self.possible_completions[index]
-		except IndexError:
-			self.possible_completions = None
+			return self.completions[index]
+		except(IndexError, TypeError):
+			self.completions = None
 			return None
 
 	def set_actions(self, action_mod_stem):
-		if self.possible_completions is None:
-			self.possible_completions = list()
-			for action_mod in state.STATE.iter_actions():
-				if action_mod.stem.startswith(action_mod_stem):
-					self.possible_completions.append(action_mod.stem)
+		# to może być problem, ale możliwe, że zrobimy po prostu metodę serach_actions(string, regex=False), to wtedy rozbijemy to 2 metody w klasie i będziemy wyszukiwali wszystko jak hopsasa
+		self.completions = list()
+		for action_mod in state.STATE.iter_actions():
+			if action_mod.stem.startswith(action_mod_stem):
+				self.completions.append(action_mod.stem)
 
 
 def start_interpreter():
@@ -70,8 +63,8 @@ def start_interpreter():
 			if action_mod.stem == prep_line.action_name:
 				try:
 					using_action_inst = state.STATE.get_module_by_path(action_mod).Action()
-					arg_num = len(inspect.getfullargspec(using_action_inst.complete).args)
-					if arg_num >= 2:
+					arg_num = len(inspect.signature(using_action_inst.execute).parameters)
+					if arg_num >= 1:
 						using_action_inst.execute(prep_line.text)
 					else:
 						using_action_inst.execute()

@@ -118,7 +118,6 @@ class ModManager(ManagerInterface):
 		]
 		self._active_mod = None
 		self._opt_iface_params = list(inspect.signature(option_iface.OptionInterface).parameters.keys())
-		# Join the params, in order to create positional arguments
 		# self._opt_data = collections.namedtuple('OptData', ' '.join(self._opt_iface_params))
 		self._opt_data = collections.namedtuple('OptData', self._opt_iface_params)
 		# self._opt_data = tuple(inspect.signature(opt_iface.OptionInterface).parameters.keys())

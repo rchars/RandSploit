@@ -29,13 +29,6 @@ class Completer:
 			prep_line = prepare_line(readline.get_line_buffer())
 			self.set_actions(prep_line.action_name)
 			if len(self.completions) == 1 and self.completions[0] == prep_line.action_name:
-				# the function should return None in case of failure
-				# żadne mod_inst, to będzie call_action_completer z nowej klasy
-				# action_inst = state.STATE.get_action_mod(prep_line.action_name).Action()
-				# if len(inspect.signature(action_inst.complete).parameters) >= 1:
-				# 	self.completions = action_inst.complete(prep_line.text)
-				# else:
-				# 	self.completions = action_inst.complete()
 				self.completions = state.ACTION_STATE.call_action_completer(prep_line.action_name, prep_line.action_arg_text)
 		try:
 			return self.completions[index]
@@ -44,7 +37,6 @@ class Completer:
 			return None
 
 	def set_actions(self, action_mod_stem):
-		# to może być problem, ale możliwe, że zrobimy po prostu metodę serach_actions(string, regex=False), to wtedy rozbijemy to 2 metody w klasie i będziemy wyszukiwali wszystko jak hopsasa
 		self.completions = list()
 		for action_mod in state.STATE.iter_actions():
 			if action_mod.stem.startswith(action_mod_stem):

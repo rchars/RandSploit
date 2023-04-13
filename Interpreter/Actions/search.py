@@ -1,7 +1,5 @@
-import Interpreter.ActionInterface as ai
 import Interpreter.state as state
 
 
-class Action(ai.ActionInterface):
-	def execute(self, regex=''):
-		pass
+def execute(self, regex=''):
+	print(f'Not finished yet, your regex {regex}')

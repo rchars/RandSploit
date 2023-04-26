@@ -1,34 +1,32 @@
+import ModInterface.ModInterface as mod_iface
+import Option.Option as opt
 import threading
 import datetime
-import modiface
 import socket
 import time
 
 
-class Mod(modiface.ModInterface):
+# This module is old
+class Mod(mod_iface.ModInterface):
 	def __init__(self):
-		super().__init__('EchoTCPServ>')
-		modiface.add_option(modiface.Option('LHOST', '', 'Hostname to listen on', required=True))
-		modiface.add_option(modiface.CastOption('LPORT', None, 'Port to listen on', cast_to=int, required=True))
-		modiface.add_option(modiface.CastOption('CLIENT_TIMEOUT', 10, 'Timeout before disconnecting', cast_to=float, required=False))
-		modiface.add_option(modiface.CastOption('CLIENT_LIMIT', 1, 'Max number of clients that can connect', cast_to=float, required=False))
+		super().__init__(mod_descr='TCP echo server')
+		self.lhost = opt.DefaultOpt('LHOST', descr='Hostname to listen on')
+		self.lport = opt.ValidatedOpt('LPORT', descr='Port to listen on', validator=int)
+		self.client_timeout = opt.ValidatedOpt('CLIENT_TIMEOUT', value=10, descr='Timeout before disconnecting', validator=float, required=False)
+		self.client_limit = opt.ValidatedOpt('CLIENT_LIMIT', 1, descr='Max number of clients that can connect', validator=int, required=False)
 
 	def run(self):
-		lhost = modiface.get_option_val('LHOST')
-		lport = modiface.get_option_val('LPORT')
-		client_limit = modiface.get_option_val('CLIENT_LIMIT')
-		if not client_limit:
-			client_limit = 1
-		client_timeout = modiface.get_option_val('CLIENT_TIMEOUT')
-		if not client_timeout:
-			client_timeout = 10
-		serv_sock = socket.create_server((lhost, lport))
-		serv_sock.listen(client_limit)
-		self.time_print(f'listening on {lhost}:{lport}')
+		if not self.client_limit.value:
+			self.client_limit.value = 1
+		if not self.client_timeout.value:
+			self.client_timeout.value = 10
+		serv_sock = socket.create_server((self.lhost.value, self.lport.value))
+		serv_sock.listen(self.client_limit.value)
+		self.time_print(f'listening on {self.lhost.value}:{self.lport.value}')
 		while True:
 			try:
 				client_sock, client_info = serv_sock.accept()
-				client_sock.settimeout(client_timeout)
+				client_sock.settimeout(self.client_timeout.value)
 				self.time_print(f'{client_info[0]}:{client_info[1]} (connected)')
 				threading.Thread(target=self.handle_client, args=(client_sock, client_info)).run()
 			except ConnectionError as conn_err:

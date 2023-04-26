@@ -10,11 +10,28 @@ def execute(text):
 			mod_id = int(text)
 		except ValueError:
 			mod_id = text
+		index = 0
 		for mod_dir in state.MOD_DIRS:
-			for index, mod_path in enumerate(mod_dir.iterdir()):
+			for mod_path in mod_dir.iterdir():
 				if mod_id == index or mod_id == str(mod_path):
-					state.ACTIVE_MOD = su.get_mod_inst(mod_path)
+					mod_inst = su.get_mod_inst(mod_path)
+					opt_names = list()
+					errors = ''
+					for opt_data in su.iter_mod_opts_data(mod_inst):
+						if opt_data.name in opt_names:
+							errors += f'Option named \'{opt_data.name}\' already exists\n'
+						else:
+							opt_names.append(opt_data.name)
+					if errors:
+						print(errors, end='')
+						return None
+					state.ACTIVE_MOD = mod_inst
 					state.PROMPT = mod_path.stem + '>'
 					return None
+				index += 1
 		else:
-			raise FileNotFoundError('Standard msg, you know what to do')
+			raise FileNotFoundError('Put this msg somewhere as global variable')
+
+
+# TODO:
+# Need complete func

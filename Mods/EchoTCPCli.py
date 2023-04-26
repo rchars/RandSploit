@@ -4,7 +4,6 @@ import socket
 import time
 
 
-
 class Mod(modiface.ModInterface):
 	def __init__(self):
 		super().__init__('EchoTCP>')

@@ -33,15 +33,17 @@ def prepare_line(text):
 
 class Completer:
 	completions = None
-	fulltext = ''
 
 	def complete(self, text, index):
 		if self.completions == None:
 			prep_line = prepare_line(readline.get_line_buffer())
 			self.set_actions(prep_line.action_name)
 			if len(self.completions) == 1 and self.completions[0] == prep_line.action_name:
-				self.completions = self.call_action_completer(prep_line.action_name, prep_line.text)
-
+				try:
+					self.completions = self.call_action_completer(prep_line.action_name, prep_line.text)
+				except Exception:
+					self.completions = None
+					return None
 		try:
 			return self.completions[index]
 		except(IndexError, TypeError):
@@ -57,9 +59,7 @@ class Completer:
 
 	def call_action_completer(self, action_stem, compl_text):
 		using_func = get_action_inst(action_stem).complete
-		arg_num = su.get_params_count(
-			using_func
-		)
+		arg_num = su.get_params_count(using_func)
 		if arg_num >= 1:
 			return using_func(compl_text)
 		else:
@@ -82,4 +82,5 @@ def start_interpreter():
 			else:
 				using_action_inst.execute()
 		except Exception:
+			# need better formatting
 			traceback.print_exc()

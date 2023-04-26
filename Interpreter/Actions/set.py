@@ -15,12 +15,13 @@ def execute(text):
 	if not line:
 		print('set <opt_name> <value>')
 		return None
-	space_index = line.find(' ')
-	name = line[0:space_index]
-	if space_index == -1:
-		value = ''
-	else:
+	try:
+		space_index = line.index(' ')
+		name = line[0:space_index]
 		value = line[space_index + 1:]
+	except ValueError:
+		name = line
+		value = ''
 	for obj in su.iter_mod_opts(state.ACTIVE_MOD):
 		if obj.name == name:
 			obj.value = value

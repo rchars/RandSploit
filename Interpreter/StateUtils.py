@@ -1,14 +1,41 @@
 import OptionInterface.OptionInterface as opt_iface
 import importlib.machinery as mach
 import Interpreter.state as state
+import dataclasses as ds
 import collections
 import pathlib
 import inspect
+import enum
 
 
 OptIfaceParams = list(inspect.signature(opt_iface.OptionInterface).parameters)
 OptFields = collections.namedtuple('OptFields', OptIfaceParams)
 OPT_IFACE_PARAMS = OptFields(*OptIfaceParams)
+
+
+# finish this class
+class CommonExc(enum.Enum):
+	@ds.dataclass
+	class CommonExc:
+		exc: None
+		msg: str
+
+		def __post_init__(self):
+			if not issubclass(self.exc, Exception):
+				raise TypeError('exc must be exception')
+			if type(self.msg) != str:
+				raise TypeError('msg must be str')
+
+	MOD_NF = CommonExc(exc=FileNotFoundError, msg='')
+	ACTION_NF = CommonExc(exc=FileNotFoundError, msg='')
+
+	@classmethod
+	def get_exc(self, exc, *strings):
+		pass
+
+
+def format_common_exc(exc, *strings):
+	pass
 
 
 def get_params_count(func):

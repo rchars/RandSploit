@@ -13,10 +13,10 @@ OptFields = collections.namedtuple('OptFields', OptIfaceParams)
 OPT_IFACE_PARAMS = OptFields(*OptIfaceParams)
 
 
-# finish this class
+# problem z accessingiem klas
 class CommonExc(enum.Enum):
 	@ds.dataclass
-	class CommonExc:
+	class exc:
 		exc: None
 		msg: str
 
@@ -26,16 +26,15 @@ class CommonExc(enum.Enum):
 			if type(self.msg) != str:
 				raise TypeError('msg must be str')
 
-	MOD_NF = CommonExc(exc=FileNotFoundError, msg='')
-	ACTION_NF = CommonExc(exc=FileNotFoundError, msg='')
+	MOD_NF = exc(exc=FileNotFoundError, msg='No such module as \'{}\'')
+	ACTION_NF = exc(exc=FileNotFoundError, msg='No such command as \'{}\'')
 
 	@classmethod
-	def get_exc(self, exc, *strings):
-		pass
-
-
-def format_common_exc(exc, *strings):
-	pass
+	def get_exc(cls, exc, *strings):
+		using_exc = cls[exc.name].value
+		if strings:
+			return using_exc.exc(using_exc.msg.format(*strings))
+		return using_exc.exc(using_exc.msg)
 
 
 def get_params_count(func):

@@ -30,7 +30,10 @@ def execute(text):
 					return None
 				index += 1
 		else:
-			raise FileNotFoundError('Put this msg somewhere as global variable')
+			raise su.CommonExc.get_exc(
+				su.CommonExc.MOD_NF,
+				mod_id
+			)
 
 
 # TODO:

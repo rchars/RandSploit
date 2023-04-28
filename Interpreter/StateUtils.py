@@ -26,8 +26,8 @@ class CommonExc(enum.Enum):
 			if type(self.msg) != str:
 				raise TypeError('msg must be str')
 
-	MOD_NF = exc(exc=FileNotFoundError, msg='No such module as \'{}\'')
-	ACTION_NF = exc(exc=FileNotFoundError, msg='No such command as \'{}\'')
+	MOD_NF = exc(exc=ModuleNotFoundError, msg='No such module as \'{}\'')
+	ACTION_NF = exc(exc=ModuleNotFoundError, msg='No such command as \'{}\'')
 
 	@classmethod
 	def get_exc(cls, exc, *strings):

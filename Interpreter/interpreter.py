@@ -1,10 +1,17 @@
 import Interpreter.StateUtils as su
 import importlib.machinery as mach
 import Interpreter.state as state
+import importlib.util as iu
 import collections
-import traceback
-import readline
+# import traceback
+import platform
 import inspect
+
+
+if any(platform.win32_ver()) and not (spec := iu.find_spec('pyreadline3')):
+	raise ModuleNotFoundError('Package \'pyreadline3\' is required to run this script under windows')
+else:
+	import readline
 
 
 PREP_LINE = collections.namedtuple('PrepLine', ['action_name', 'text'])
@@ -16,7 +23,10 @@ def get_action_inst(action_stem):
 			if action_path.stem == action_stem:
 				return mach.SourceFileLoader(action_path.name, str(action_path)).load_module()
 	else:
-		raise FileNotFoundError(f'No such command as \'{action_stem}\'')
+		raise su.CommonExc.get_exc(
+			su.CommonExc.ACTION_NF,
+			action_stem
+		)
 
 
 def prepare_line(text):
@@ -81,6 +91,5 @@ def start_interpreter():
 				using_action_inst.execute(prep_line.text)
 			else:
 				using_action_inst.execute()
-		except Exception:
-			# need better formatting
-			traceback.print_exc()
+		except Exception as action_exec_exc:
+			print(action_exec_exc)

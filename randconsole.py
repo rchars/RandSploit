@@ -7,7 +7,7 @@ if __name__ == '__main__':
 	try:
 		Interpreter.interpreter.start_interpreter()
 	except(KeyboardInterrupt, EOFError):
-		sys.exit('\n')
+		sys.exit('Bye!')
 	except ModuleNotFoundError as mod_err:
 		print(mod_err)
 		sys.exit('\n')

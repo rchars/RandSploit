@@ -5,7 +5,8 @@ import tabulate
 def generate():
 	for mod_dir in state.MOD_DIRS:
 		for mod_path in mod_dir.iterdir():
-			yield [str(mod_path)]
+			if mod_path.suffix == '.py':
+				yield [str(mod_path)]
 
 
 def execute():

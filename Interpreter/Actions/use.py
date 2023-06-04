@@ -13,6 +13,8 @@ def execute(text):
 		index = 0
 		for mod_dir in state.MOD_DIRS:
 			for mod_path in mod_dir.iterdir():
+				if not mod_path.is_file():
+					continue
 				if mod_id == index or mod_id == str(mod_path):
 					mod_inst = su.get_mod_inst(mod_path)
 					opt_names = list()

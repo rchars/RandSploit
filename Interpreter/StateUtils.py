@@ -13,7 +13,6 @@ OptFields = collections.namedtuple('OptFields', OptIfaceParams)
 OPT_IFACE_PARAMS = OptFields(*OptIfaceParams)
 
 
-# problem z accessingiem klas
 class CommonExc(enum.Enum):
 	@ds.dataclass
 	class exc:

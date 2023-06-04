@@ -14,13 +14,13 @@ else:
 	import readline
 
 
-PREP_LINE = collections.namedtuple('PrepLine', ['action_name', 'text'])
+PREP_LINE = collections.namedtuple('PrepLine', ['action_name', 'text', 'sep'])
 
 
 def get_action_inst(action_stem):
 	for action_dir in state.ACTION_DIRS:
 		for action_path in action_dir.iterdir():
-			if action_path.stem == action_stem:
+			if action_path.is_file() and action_path.stem == action_stem:
 				return mach.SourceFileLoader(action_path.name, str(action_path)).load_module()
 	else:
 		raise su.CommonExc.get_exc(
@@ -33,12 +33,14 @@ def prepare_line(text):
 	text = text.lstrip()
 	try:
 		space_index = text.index(' ')
+		sep = True
 		action_mod_stem = text[0:space_index]
 		action_arg_text = text[space_index + 1:].lstrip()
 	except ValueError:
+		sep = False
 		action_mod_stem = text
 		action_arg_text = ''
-	return PREP_LINE(action_mod_stem, action_arg_text)
+	return PREP_LINE(action_mod_stem, action_arg_text, sep)
 
 
 class Completer:
@@ -48,7 +50,7 @@ class Completer:
 		if self.completions == None:
 			prep_line = prepare_line(readline.get_line_buffer())
 			self.set_actions(prep_line.action_name)
-			if len(self.completions) == 1 and self.completions[0] == prep_line.action_name:
+			if len(self.completions) == 1 and self.completions[0] == prep_line.action_name and prep_line.sep:
 				try:
 					self.completions = self.call_action_completer(prep_line.action_name, prep_line.text)
 				except Exception:
@@ -64,7 +66,7 @@ class Completer:
 		self.completions = list()
 		for action_dir in state.ACTION_DIRS:
 			for action_mod in action_dir.iterdir():
-				if action_mod.stem.startswith(action_mod_stem):
+				if action_mod.is_file() and action_mod.stem.startswith(action_mod_stem):
 					self.completions.append(action_mod.stem)
 
 	def call_action_completer(self, action_stem, compl_text):

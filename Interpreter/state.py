@@ -6,3 +6,4 @@ OPTION_DIRS = []
 MOD_DIRS = []
 PROMPT = 'rand>'
 END = False
+DEV = True

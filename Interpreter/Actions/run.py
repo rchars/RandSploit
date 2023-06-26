@@ -1,5 +1,6 @@
 import Interpreter.StateUtils as su
 import Interpreter.state as state
+import traceback
 
 
 def execute(self):
@@ -17,3 +18,10 @@ def execute(self):
 			state.ACTIVE_MOD.run()
 		except(KeyboardInterrupt, EOFError):
 			print()
+		except Exception as run_err:
+			if state.DEV:
+				traceback.print_exc()
+			else:
+				print(run_err)
+		finally:
+			return

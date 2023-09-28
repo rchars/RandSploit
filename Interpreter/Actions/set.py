@@ -1,13 +1,14 @@
 import OptionInterface.OptionInterface as opt_iface
 import Interpreter.StateUtils as su
 import Interpreter.state as state
-import inspect
+
+
+# TODO:
+# Replace "error" print statements with "RuntimeException".
 
 
 def execute(text):
-	'''
-		Set the option for choosen module
-	'''
+	'''Set an option for the chosen module.'''
 	if not state.ACTIVE_MOD:
 		print('Select module first')
 		return None

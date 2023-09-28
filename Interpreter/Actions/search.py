@@ -15,6 +15,7 @@ def search(regex):
 
 
 def execute(regex=''):
+	'''Search for a module.'''
 	print(
 		tabulate.tabulate(search(regex), tablefmt=state.TABLEFMT)
 	)

@@ -1,4 +1,5 @@
-import Interpreter.state
+import Interpreter.state as state
+import Interpreter.Impl.SessionDict as isd
 import pathlib
 
 
@@ -15,3 +16,4 @@ except OSError:
 	pass
 else:
 	state.MOD_DIRS.append(user_mods_path)
+state.BACKGROUND_MODS = isd.SessionDict()

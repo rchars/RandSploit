@@ -10,6 +10,7 @@ def generate():
 
 
 def execute():
+	'''Get a list of all modules.'''
 	print(
 		tabulate.tabulate(
 			generate(),

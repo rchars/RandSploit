@@ -4,6 +4,7 @@ import tabulate
 
 
 def execute():
+	'''Get a list of all options for the chosen module.'''
 	if not state.ACTIVE_MOD:
 		print('Choose mod fist')
 	else:

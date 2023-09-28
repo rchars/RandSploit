@@ -1,8 +1,10 @@
+import Interpreter.Impl.Session as sn
 import Interpreter.StateUtils as su
 import Interpreter.state as state
 
 
 def execute(text):
+	'''Use a module.'''
 	if not text:
 		print('Use what ?')
 	else:
@@ -28,6 +30,9 @@ def execute(text):
 						print(errors, end='')
 						return None
 					state.ACTIVE_MOD = mod_inst
+					state.ACTIVE_MOD_PROC = sn.Session(
+						mod_inst
+					)
 					state.PROMPT = mod_path.stem + '>'
 					return None
 				index += 1

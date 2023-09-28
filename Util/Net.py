@@ -1,4 +1,3 @@
-import traceback
 import socket
 
 
@@ -31,3 +30,4 @@ class RecvLines:
 	@property
 	def death_reason(self):
 		return self._death_reason
+

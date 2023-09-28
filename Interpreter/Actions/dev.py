@@ -2,9 +2,10 @@ import Interpreter.state
 
 
 def execute():
-	if Interpreter.state.DEV:
-		Interpreter.state.DEV = False
+	'''Enable developer mode (verbose exceptions).'''
+	if not Interpreter.state.DEV:
+		Interpreter.state.DEV = True
 		print('Developer mode on')
 	else:
-		Interpreter.state.DEV = True
+		Interpreter.state.DEV = False
 		print('Developer mode off')

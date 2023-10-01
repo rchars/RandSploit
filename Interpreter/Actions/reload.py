@@ -1,11 +1,13 @@
-# import Interpreter.Actions.use as u
-# import importlib.machinery as my
-# import Interpreter.state
+import Interpreter.state as state
 # import inspect
-#
-#
+
+
 # def execute():
-# 	if not Interpreter.state.ACTIVE_MOD: return
-# 	module = inspect.getmodule(Interpreter.state.ACTIVE_MOD)
-# 	import pdb; pdb.set_trace()
-# 	u.execute(module.__file__)
+# 	if not state.ACTIVE_MOD: return
+# 	module = inspect.getmodule(state.ACTIVE_MOD)
+
+
+def execute():
+	'''Reload the current module.'''
+	if not state.MOD_HANDLER.is_mod_set(): return
+	state.MOD_HANDLER.reload_current_mod()

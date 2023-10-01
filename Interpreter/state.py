@@ -1,10 +1,13 @@
-BACKGROUND_MODS = None
 TABLEFMT = 'fancy_grid'
-ACTIVE_MOD_PROC = None
-ACTIVE_MOD = None
+MOD_HANDLER = None
 ACTION_DIRS = []
-OPTION_DIRS = []
-MOD_DIRS = []
 PROMPT = 'rand>'
 END = False
-DEV = True
+FRAME_DEV = None
+MOD_DEV = None
+
+# MOD_DIRS = []
+# ACTIVE_MOD = None
+# ACTIVE_MOD_PROC = None
+# BACKGROUND_MODS = None
+# DEV = True

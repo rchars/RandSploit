@@ -1,6 +1,6 @@
 import Interpreter.state as state
 
 
-def execute(self):
+def execute():
 	'''Quit the program.'''
 	state.END = True

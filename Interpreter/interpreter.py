@@ -3,12 +3,12 @@ import importlib.machinery as mach
 import Interpreter.state as state
 import importlib.util as iu
 import collections
+import traceback
 import platform
-import inspect
 
 
 if any(platform.win32_ver()) and not (spec := iu.find_spec('pyreadline3')):
-	raise ModuleNotFoundError('Package \'pyreadline3\' is required to run this script under windows')
+	raise ModuleNotFoundError('Package \'pyreadline3\' is required to run this script on windows')
 else:
 	import readline
 
@@ -77,21 +77,62 @@ class Completer:
 			return using_func()
 
 
+# def start_interpreter():
+# 	readline.parse_and_bind('tab: complete')
+# 	readline.set_completer(Completer().complete)
+# 	while not state.END:
+# 		line = input(state.PROMPT)
+# 		prep_line = prepare_line(line)
+# 		if not prep_line.action_name:
+# 			continue
+# 		arg_num = None
+# 		using_action_inst = None
+# 		try:
+# 			using_action_inst = get_action_inst(prep_line.action_name)
+# 			arg_num = su.get_params_count(using_action_inst.execute)
+# 		except Exception as action_exc:
+# 			print(action_exc)
+# 			continue
+# 		try:
+# 			if arg_num >= 1:
+# 				using_action_inst.execute(prep_line.text)
+# 			else:
+# 				using_action_inst.execute()
+# 		except Exception as action_exec_exc:
+# 			if state.DEV:
+# 				traceback.print_exc()
+# 			else:
+# 				print(action_exec_exc)
+# 		except KeyboardInterrupt: print()
+
+
 def start_interpreter():
 	readline.parse_and_bind('tab: complete')
 	readline.set_completer(Completer().complete)
 	while not state.END:
-		line = input(state.PROMPT)
+		line = input(state.MOD_HANDLER.prompt)
 		prep_line = prepare_line(line)
-		if not prep_line.action_name:
-			continue
+		if not prep_line.action_name: continue
+		arg_num = None
+		using_action_inst = None
 		try:
 			using_action_inst = get_action_inst(prep_line.action_name)
 			arg_num = su.get_params_count(using_action_inst.execute)
+		except Exception as action_exc:
+			if state.FRAME_DEV.value:
+				traceback.print_exc()
+			else:
+				print(action_exc)
+			continue
+		try:
 			if arg_num >= 1:
 				using_action_inst.execute(prep_line.text)
 			else:
 				using_action_inst.execute()
 		except Exception as action_exec_exc:
-			print(action_exec_exc)
+			if state.MOD_DEV.value:
+				traceback.print_exc()
+			else:
+				print(action_exec_exc)
+		except KeyboardInterrupt: print()
 

@@ -1,19 +1,23 @@
 import OptionInterface.OptionInterface as opt_iface
+import Interpreter.Impl.Session as sn
 import importlib.machinery as mach
 import Interpreter.state as state
+import importlib.util as iu
 import dataclasses as ds
 import collections
 import pathlib
 import inspect
+import copy
 import enum
+import sys
 
 
+# Bloat
 OptIfaceParams = list(inspect.signature(opt_iface.OptionInterface).parameters)
 OptFields = collections.namedtuple('OptFields', OptIfaceParams)
 OPT_IFACE_PARAMS = OptFields(*OptIfaceParams)
 
 
-# problem z accessingiem klas
 class CommonExc(enum.Enum):
 	@ds.dataclass
 	class exc:
@@ -50,7 +54,17 @@ def call_func(func, arg):
 
 
 def get_mod_inst(mod_path):
-	return mach.SourceFileLoader(mod_path.name, str(mod_path)).load_module().Mod()
+	relative_path = f'{mod_path.parent.name}.{mod_path.stem}'
+	spec = mach.ModuleSpec(
+		name=relative_path,
+		loader=mach.SourceFileLoader(relative_path, str(mod_path)),
+		origin=mod_path,
+		is_package=False
+	)
+	mod = iu.module_from_spec(spec)
+	spec.loader.exec_module(mod)
+	sys.modules[relative_path] = mod
+	return mod.Mod()
 
 
 def get_mod_path(mod_stem):
@@ -75,3 +89,16 @@ def iter_mod_opts_data(mod_inst):
 		for param in OPT_IFACE_PARAMS:
 			fields.append(getattr(opt, param))
 		yield OptFields(*fields)
+
+
+def reload_current_mod():
+	active_mod_copy = copy.deepcopy(state.ACTIVE_MOD)
+	state.ACTIVE_MOD = active_mod_copy
+	state.ACTIVE_MOD_PROC = sn.Session(active_mod_copy)
+	# No need to reload the prompt, cuz it will be here already
+
+
+def unset_current_mod():
+	state.ACTIVE_MOD_PROC = None
+	state.ACTIVE_MOD = None
+	state.PROMPT = 'rand>'

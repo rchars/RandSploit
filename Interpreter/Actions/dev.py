@@ -3,10 +3,10 @@ import Interpreter.state as state
 
 def execute(text):
 	'''Enable developer mode (verbose exceptions).'''
-	if not text:
+	if not text or 'help'.startswith(text.lower()):
 		print(
-			'dev frame\n' +
-			'dev mod\n',
+			'dev frame => Toggle the frame developer mode.\n' +
+			'dev mod => Toggle the module developer mode.\n',
 			end=''
 		)
 		return
@@ -19,6 +19,12 @@ def execute(text):
 	gate_to_toggle = modes[text]
 	gate_to_toggle.toggle()
 	print(f'{gate_to_toggle.name} mode => {gate_to_toggle}')
+
+
+def complete(text):
+	if not text: return ['frame', 'mod']
+	if 'frame'.startswith(text): return ['frame']
+	elif 'mod'.startswith(text): return ['mod']
 
 
 # def execute():

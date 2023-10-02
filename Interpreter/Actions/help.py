@@ -11,10 +11,10 @@ def generate():
 			try:
 				doc = action_mod_inst.execute.__doc__
 			except AttributeError:
-				doc = 'undocumented'
+				doc = 'Undocumented.'
 			else:
 				if not action_mod_inst.execute.__doc__:
-					doc = 'undocumented'
+					doc = 'Undocumented.'
 			yield [action_mod_path.stem, doc]
 
 

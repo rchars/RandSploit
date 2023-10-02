@@ -34,28 +34,31 @@ def run_in_foreground():
 			print(run_err)
 
 
+def print_help():
+	print('run bg => Execute in background (not implemented).')
+	print('run fg => Execute in foreground.')
+	print('run => Execute in foreground.')
+
+
 def execute(where=''):
 	'''Run the chosen module.'''
+	if not where: where = 'fg'
+	elif 'help'.startswith(where.lower()): print_help()
 	if not state.MOD_HANDLER.is_mod_set():
-		print('Choose mod before executing')
+		print('Choose mod before executing.')
 		return
 	where_to_execute = {
 		'fg': run_in_foreground,
 		'bg': run_in_background
 	}
-	if not where: where = 'fg'
-	elif where not in where_to_execute.keys():
-		print(
-			f'Invalid option \'{where}\'\n',
-			f'Execute in background: run bg\n',
-			f'Execute in foreground: run fg\n',
-			end=''
-		)
+	if where not in where_to_execute.keys():
+		print(f'Invalid option \'{where}\'')
+		print_help()
 		return
 	errors = ''
 	for opt in state.MOD_HANDLER.iter_mod_opts_data():
 		if opt.required and opt.value == '':
-			errors += f'\'{opt.name}\' is required\n'
+			errors += f'\'{opt.name}\' is required.\n'
 	if errors:
 		print(errors, end='')
 		return

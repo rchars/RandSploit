@@ -30,17 +30,21 @@ class Handler:
 
 	def iter_mods_with_index(self): return enumerate(self.iter_mods())
 
-	def iter_mod_opts(self):
-		for obj in vars(self._active_mod).values():
+	def _iter_mod_opts(self, mod_inst):
+		for obj in vars(mod_inst).values():
 			if isinstance(obj, opt_iface.OptionInterface):
 				yield obj
 
-	def iter_mod_opts_data(self):
-		for obj in self.iter_mod_opts():
+	def _iter_mod_opts_data(self, mod_inst):
+		for obj in self._iter_mod_opts(mod_inst):
 			fields = list()
 			for param in self._opt_iface_params:
 				fields.append(getattr(obj, param))
 			yield self._opt_fields(*fields)
+
+	def iter_mod_opts(self): return self._iter_mod_opts(self._active_mod)
+
+	def iter_mod_opts_data(self): return self._iter_mod_opts_data(self._active_mod)
 
 	def set_mod_opt(self, name, value):
 		for opt in self.iter_mod_opts():
@@ -82,7 +86,8 @@ class Handler:
 		return False
 	
 	def _set_active_mod(self, mod_path):
-		self._active_mod = self._get_mod_inst(mod_path)
+		mod_inst = self._get_mod_inst(mod_path)
+		self._active_mod = mod_inst
 		self._active_mod_path = mod_path
 		self._prompt = self._active_mod_path.stem + '>'
 

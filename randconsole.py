@@ -15,9 +15,13 @@ if __name__ == '__main__':
 
 # TODO:
 # Documentation
-# Better exception handling
-# Session backgrounding
+# Session backgrounding (difficult)
+# Option templates
+# Util package
+# Support for user options, utils, validators
+# Support for handling external dependencies (maybe)
 # VENV
 # IDEA:
 # Linux SO injector module
 # Network stuff module
+# HTTPRequestModule

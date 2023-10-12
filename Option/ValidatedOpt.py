@@ -2,18 +2,15 @@ import OptionInterface.OptionInterface as oi
 
 
 class Opt(oi.OptionInterface):
-	def __init__(self, name, value='', descr='', required=True, validator=str):
+	def __init__(self, name, value='', descr='', required=True, validator=str, *args, **kwargs):
 		if not callable(validator):
 			raise TypeError('Validator must be callable')
 		self.validator = validator
 		self._value = value
-		super().__init__(name, descr, self._value, required)
+		super().__init__(name, descr, self._value, required, *args, **kwargs)
 
 	@property
-	def value(self):
-		if self._value != '':
-			return self.validator(self._value)
-		return ''
+	def value(self): return self._value
 
 	@value.setter
 	def value(self, new_value):

@@ -43,3 +43,4 @@ class _AutoModProvider:
 ModIface = m.ModInterface
 Util = _AutoModProvider('util', 'Util')
 Opt = _AutoModProvider('opt', 'Option', inst_name='Opt')
+OptTemplate = _AutoModProvider('template', 'OptionTemplate')

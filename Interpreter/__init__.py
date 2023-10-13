@@ -16,6 +16,12 @@ state.ACTION_DIRS = [
 # ]
 mod_dirs = [pathlib.Path(__file__).parents[1] / pathlib.Path('Mods')]
 user_mods_path = pathlib.Path().home() / pathlib.Path('.RandSploit/Mods')
+user_editor = pathlib.Path().home() / pathlib.Path('RandSploit.editor')
+if user_editor.is_file():
+	with user_editor.open() as f:
+		editor_str_path = f.readline()
+	if editor_str_path != '':
+		EDITOR = editor_str_path
 try:
 	user_mods_path.mkdir(exist_ok=True, parents=True)
 except OSError:

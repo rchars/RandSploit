@@ -111,4 +111,7 @@ class Handler:
 	def active_mod(self): return self._active_mod
 
 	@property
+	def active_mod_path(self): return self.active_mod_path
+
+	@property
 	def opt_iface_params(self): return self._opt_iface_params

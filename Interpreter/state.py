@@ -5,6 +5,7 @@ PROMPT = 'rand>'
 END = False
 FRAME_DEV = None
 MOD_DEV = None
+EDITOR = None
 
 # MOD_DIRS = []
 # ACTIVE_MOD = None

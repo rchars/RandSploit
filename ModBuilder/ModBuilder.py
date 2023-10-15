@@ -1,3 +1,4 @@
+import OptionInterface.OptionInterface as o
 import ModInterface.ModInterface as m
 import importlib.machinery as my
 import pathlib
@@ -21,7 +22,6 @@ import pathlib
 # Util = _AutoModProvider('util', 'Util')
 # Opt = _AutoModProvider('opt', 'Option')
 
-
 class _AutoModProvider:
 	def __init__(self, exc_ins, search_dir, inst_name=None):
 		self.search_dir = search_dir
@@ -41,6 +41,7 @@ class _AutoModProvider:
 
 
 ModIface = m.ModInterface
+OptIface = o.OptionInterface
 Util = _AutoModProvider('util', 'Util')
 Opt = _AutoModProvider('opt', 'Option', inst_name='Opt')
 OptTemplate = _AutoModProvider('template', 'OptionTemplate')

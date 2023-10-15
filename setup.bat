@@ -2,6 +2,6 @@
 
 
 python -m venv venv
-venv\Scripts\activate.bat
+call venv\Scripts\activate.bat
 pip install -r requirements.txt
-deactivate
+call venv\Scripts\deactivate.bat

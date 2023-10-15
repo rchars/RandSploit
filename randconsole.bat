@@ -1,6 +1,6 @@
 @echo off
 
 
-venv\Scripts\activate.bat
+call venv\Scripts\activate.bat
 python -B randconsole.py
-deactivate
+call venv\Scripts\deactivate.bat

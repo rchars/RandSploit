@@ -11,12 +11,13 @@ def call_editor(mod_str_path):
 				break
 		else: raise ValueError('No module has index \'{mod_index}\' assigned')
 	if not state.EDITOR:
-		state.EDITOR = input('Editor:')
-	os.system(f'{state.EDITOR} {mod_str_path}')
+		using_editor = input('Editor:')
+	else: using_editor = state.EDITOR
+	os.system(f'{using_editor} {mod_str_path}')
 
 
 def execute(module):
 	if module: call_editor(module)
-	elif not state.MOD_HANDLER.is_mod_set():
+	elif state.MOD_HANDLER.is_mod_set():
 		call_editor(state.MOD_HANDLER.active_mod_path)
 	else: print('Choose a module first.')

@@ -1,7 +1,11 @@
 @echo off
 
 
-python -m venv venv
-call venv\Scripts\activate.bat
+echo Starting setup...
+set home=%USERPROFILE%\.RandSploit\venv
+mkdir "%home%"
+python -m venv "%home%"
+call "%home%\Scripts\activate.bat"
 pip install -r requirements.txt
-call venv\Scripts\deactivate.bat
+call "%home%\Scripts\deactivate.bat"
+echo All done.

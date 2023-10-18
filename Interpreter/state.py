@@ -1,0 +1,12 @@
+TABLEFMT = 'fancy_grid'
+MOD_HANDLER = None
+ACTION_DIRS = []
+PROMPT = 'rand>'
+END = False
+USER_OPT_TEMPLATE_DIR = None
+USER_UTIL_DIR = None
+USER_MOD_DIR = None
+USER_OPT_DIR = None
+FRAME_DEV = None
+MOD_DEV = None
+EDITOR = None

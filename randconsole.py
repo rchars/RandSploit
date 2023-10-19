@@ -16,10 +16,16 @@ if __name__ == '__main__':
 # TODO:
 # Documentation
 # Session backgrounding (difficult)
-# Option templates
-# Util package
-# Support for user options, utils, validators
+# Option templates (enlarge)
+# Util package (enlarge)
+# Better reload command
+# Editor option
+# Better pip handling
+# Help for the options
 # IDEA:
 # Linux SO injector module
 # Network stuff module
-# HTTPRequestModule
+# HTTPLinkSearch
+# HTTPRequest
+# DNSResolver
+# TCPProxy

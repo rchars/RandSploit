@@ -1,19 +1,14 @@
-# import Interpreter.Impl.SessionDict as isd
 import Interpreter.Impl.ModHandler as mh
 import Interpreter.Impl.BoolGate as bg
 import Interpreter.state as state
 import pathlib
 
 
-state.MOD_DEV = bg.Gate(value=True, name='Module developer')
 state.FRAME_DEV = bg.Gate(name='Frame developer')
-# state.BACKGROUND_MODS = isd.SessionDict()
+state.MOD_DEV = bg.Gate(name='Module developer')
 state.ACTION_DIRS = [
 	pathlib.Path(__file__).parent / pathlib.Path('Actions')
 ]
-# state.MOD_DIRS = [
-# 	pathlib.Path(__file__).parents[1] / pathlib.Path('Mods')
-# ]
 mod_dirs = [pathlib.Path(__file__).parents[1] / pathlib.Path('Mods')]
 user_opt_templates_path = pathlib.Path().home() / pathlib.Path('.RandSploit/OptionTemplate')
 user_opt_path = pathlib.Path().home() / pathlib.Path('.RandSploit/Actions')

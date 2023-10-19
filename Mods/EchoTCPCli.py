@@ -21,8 +21,8 @@ class Mod(modiface.ModInterface):
 			handle_recv = mb.Util.Net.RecvLines(s)
 			for line in handle_recv.recv_till_dead():
 				print(line, end='')
-		if handle_recv.reminder:
-			print(handle_recv.reminder)
-		if handle_recv.death_reason:
-			print(handle_recv.death_reason)
-		time.sleep(self.send_delay.value)
+			if handle_recv.reminder:
+				print(handle_recv.reminder)
+			if handle_recv.death_reason:
+				print(handle_recv.death_reason)
+			time.sleep(self.send_delay.value)

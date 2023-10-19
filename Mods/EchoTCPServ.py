@@ -1,6 +1,5 @@
 import ModInterface.ModInterface as mod_iface
 import ModBuilder.ModBuilder as mb
-import Option.Option as opt
 import threading
 import traceback
 import datetime
@@ -12,10 +11,10 @@ import time
 class Mod(mod_iface.ModInterface):
 	def __init__(self):
 		super().__init__(mod_descr='TCP echo server')
-		self.lhost = opt.DefaultOpt('LHOST', value='localhost', descr='Hostname to listen on')
-		self.lport = opt.ValidatedOpt('LPORT', value=9999, descr='Port to listen on', validator=int)
-		self.client_timeout = opt.ValidatedOpt('CLIENT_TIMEOUT', value=3, descr='Timeout before disconnecting', validator=float, required=False)
-		self.client_limit = opt.ValidatedOpt('CLIENT_LIMIT', 3, descr='Max number of clients that can connect', validator=int, required=False)
+		self.lhost = mb.Opt.DefaultOpt('LHOST', value='localhost', descr='Hostname to listen on')
+		self.lport = mb.Opt.ValidatedOpt('LPORT', value=9999, descr='Port to listen on', validator=int)
+		self.client_timeout = mb.Opt.ValidatedOpt('CLIENT_TIMEOUT', value=3, descr='Timeout before disconnecting', validator=float, required=False)
+		self.client_limit = mb.Opt.ValidatedOpt('CLIENT_LIMIT', 3, descr='Max number of clients that can connect', validator=int, required=False)
 
 	def run(self):
 		if not self.client_limit.value:

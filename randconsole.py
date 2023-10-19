@@ -15,9 +15,17 @@ if __name__ == '__main__':
 
 # TODO:
 # Documentation
-# Better exception handling
-# Session backgrounding
-# VENV
+# Session backgrounding (difficult)
+# Option templates (enlarge)
+# Util package (enlarge)
+# Better reload command
+# Editor option
+# Better pip handling
+# Help for the options
 # IDEA:
 # Linux SO injector module
 # Network stuff module
+# HTTPLinkSearch
+# HTTPRequest
+# DNSResolver
+# TCPProxy

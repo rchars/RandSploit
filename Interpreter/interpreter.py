@@ -129,8 +129,8 @@ def start_interpreter():
 				using_action_inst.execute(prep_line.text)
 			else:
 				using_action_inst.execute()
-		except Exception as action_exec_exc:
-			if state.MOD_DEV.value:
+		except(Exception, SystemExit) as action_exec_exc:
+			if state.MOD_DEV.value or state.FRAME_DEV.value:
 				traceback.print_exc()
 			else:
 				print(action_exec_exc)

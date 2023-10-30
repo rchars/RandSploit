@@ -1,23 +1,44 @@
+import Interpreter.SharedCompleters as ss
+import Interpreter.Impl.ArgParser as ap
 import Interpreter.state as state
+import subprocess
+import tempfile
 import os
 
 
-def call_editor(mod_str_path):
-	if mod_str_path.isdigit():
-		mod_index = int(mod_str_path)
-		for index, mod_path in state.MOD_HANDLER.iter_mods_with_index():
-			if index == mod_index:
-				mod_str_path = str(mod_path)
-				break
-		else: raise ValueError('No module has index \'{mod_index}\' assigned')
-	if not state.EDITOR:
-		using_editor = input('Editor:')
-	else: using_editor = state.EDITOR
-	os.system(f'{using_editor} {mod_str_path}')
+parser = ap.Parser()
+parser.add_argument(
+	'option'
+)
+parser.add_argument(
+	'-e',
+	action='store_true'
+)
+parser.add_argument(
+	'--choose-editor',
+	action='store_true'
+)
 
 
-def execute(module):
-	if module: call_editor(module)
-	elif state.MOD_HANDLER.is_mod_set():
-		call_editor(state.MOD_HANDLER.active_mod_path)
-	else: print('Choose a module first.')
+def execute(text):
+	'''Change the option's value in the text editor.'''
+	if not state.MOD_HANDLER.is_mod_set():
+		raise RuntimeError('Choose mod first')
+	args = parser.parse_args(text)
+	opt = state.MOD_HANDLER.get_mod_opt(args.option)
+	current_opt_value = opt.value
+	if args.e: current_opt_value = ''
+	if not (editor_str := state.EDITOR_HANDLER.current_editor) or args.choose_editor:
+		editor_str = input('Editor:')
+	try:
+		with tempfile.NamedTemporaryFile(mode='w', delete=False) as tf:
+			tf.write(current_opt_value)
+		proc = subprocess.run([editor_str, tf.name])
+		if proc.returncode == 0:
+			state.EDITOR_HANDLER.current_editor = editor_str
+		with open(tf.name, 'r') as rtf:
+				opt.value = rtf.read()
+	finally: os.remove(tf.name)
+
+
+complete = ss.complete

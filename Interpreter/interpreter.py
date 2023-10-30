@@ -77,35 +77,6 @@ class Completer:
 			return using_func()
 
 
-# def start_interpreter():
-# 	readline.parse_and_bind('tab: complete')
-# 	readline.set_completer(Completer().complete)
-# 	while not state.END:
-# 		line = input(state.PROMPT)
-# 		prep_line = prepare_line(line)
-# 		if not prep_line.action_name:
-# 			continue
-# 		arg_num = None
-# 		using_action_inst = None
-# 		try:
-# 			using_action_inst = get_action_inst(prep_line.action_name)
-# 			arg_num = su.get_params_count(using_action_inst.execute)
-# 		except Exception as action_exc:
-# 			print(action_exc)
-# 			continue
-# 		try:
-# 			if arg_num >= 1:
-# 				using_action_inst.execute(prep_line.text)
-# 			else:
-# 				using_action_inst.execute()
-# 		except Exception as action_exec_exc:
-# 			if state.DEV:
-# 				traceback.print_exc()
-# 			else:
-# 				print(action_exec_exc)
-# 		except KeyboardInterrupt: print()
-
-
 def start_interpreter():
 	readline.parse_and_bind('tab: complete')
 	readline.set_completer(Completer().complete)
@@ -129,10 +100,10 @@ def start_interpreter():
 				using_action_inst.execute(prep_line.text)
 			else:
 				using_action_inst.execute()
-		except(Exception, SystemExit) as action_exec_exc:
+		except Exception as action_exec_exc:
 			if state.MOD_DEV.value or state.FRAME_DEV.value:
 				traceback.print_exc()
 			else:
 				print(action_exec_exc)
 		except KeyboardInterrupt: print()
-
+		except SystemExit as argpasre_exit: continue

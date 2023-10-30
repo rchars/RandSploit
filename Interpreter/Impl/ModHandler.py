@@ -8,7 +8,7 @@ import sys
 
 
 class Handler:
-	def __init__(self, locations: tuple, default_prompt='rand>') -> None:
+	def __init__(self, locations: tuple, default_prompt='rand>'):
 		if len(locations) < 0: raise ValueError('List can not be empty')
 		self._default_prompt = default_prompt
 		self._prompt = self._default_prompt
@@ -46,12 +46,20 @@ class Handler:
 
 	def iter_mod_opts_data(self): return self._iter_mod_opts_data(self._active_mod)
 
-	def set_mod_opt(self, name, value):
+	def get_mod_opt(self, name):
 		for opt in self.iter_mod_opts():
 			if opt.name == name:
-				opt.value = value
-				break
+				return opt
 		else: raise ValueError(f'No such option as \'{name}\'')
+
+	def set_mod_opt(self, name, value):
+		# for opt in self.iter_mod_opts():
+		# 	if opt.name == name:
+		# 		opt.value = value
+		# 		break
+		# else: raise ValueError(f'No such option as \'{name}\'')
+		opt = self.get_mod_opt(name)
+		opt.value = value
 	
 	# May need option saving too.
 	def reload_current_mod(self):

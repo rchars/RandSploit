@@ -1,3 +1,4 @@
+import Interpreter.Impl.EditorHandler as eh
 import Interpreter.Impl.ModHandler as mh
 import Interpreter.Impl.BoolGate as bg
 import Interpreter.state as state
@@ -14,12 +15,10 @@ user_opt_templates_path = pathlib.Path().home() / pathlib.Path('.RandSploit/Opti
 user_opt_path = pathlib.Path().home() / pathlib.Path('.RandSploit/Actions')
 user_mods_path = pathlib.Path().home() / pathlib.Path('.RandSploit/Mods')
 user_util_path = pathlib.Path().home() / pathlib.Path('.RandSploit/Util')
-user_editor = pathlib.Path().home() / pathlib.Path('RandSploit.editor')
-if user_editor.is_file():
-	with user_editor.open() as f:
-		editor_str_path = f.readline()
-	if editor_str_path != '':
-		EDITOR = editor_str_path
+user_editor = pathlib.Path().home() / pathlib.Path('RandSploit/editor.ini')
+state.EDITOR_HANDLER = eh.Handler(
+	user_editor
+)
 try:
 	user_opt_templates_path.mkdir(exist_ok=True, parents=True)
 	user_mods_path.mkdir(exist_ok=True, parents=True)

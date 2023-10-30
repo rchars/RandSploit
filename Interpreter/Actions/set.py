@@ -4,7 +4,9 @@ import Interpreter.state as state
 import argparse
 
 
-parser = ap.Parser()
+parser = ap.Parser(
+	script_name='set'
+)
 parser.add_argument(
 	'option'
 )
@@ -17,9 +19,9 @@ parser.add_argument(
 
 def execute(text):
 	'''Set an option for the chosen module'''
+	args = parser.parse_args(text)
 	if not state.MOD_HANDLER.is_mod_set():
 		raise RuntimeError('Choose mod first')
-	args = parser.parse_args(text)
 	state.MOD_HANDLER.set_mod_opt(
 		name=args.option,
 		value=(

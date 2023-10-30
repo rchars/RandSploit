@@ -1,17 +1,15 @@
 import Interpreter.state as state
 import ast
-import pip
 
 
 def install_deps(docstring):
+	import pip._internal.cli.main as mn
 	for dep in docstring.splitlines():
 		if not dep: continue
 		try:
-			pip.main(['install', dep])
+			mn.main(['install', dep])
 		except Exception as install_err:
 			print(install_err)
-		else:
-			print(f'Installed dependecy \'{dep}\'')
 
 
 def execute(mod_id):
@@ -32,7 +30,6 @@ def execute(mod_id):
 	for node in ast.walk(code):
 		if not isinstance(node, ast.Assign): continue
 		for target in node.targets:
-			# Tu jest gdzieś problem	
 			if isinstance(target, ast.Name) and target.id == 'deps':
 				if isinstance(node.value, ast.Str):
 					docstring = node.value.s
@@ -42,5 +39,5 @@ def execute(mod_id):
 					break
 		else: continue
 		break
-	else: raise RuntimeError('The module \'{mod_id}\' has no external dependencies')
+	else: raise RuntimeError(f'The module \'{mod_id}\' has no external dependencies')
 	install_deps(docstring)

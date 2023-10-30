@@ -6,7 +6,9 @@ import tempfile
 import os
 
 
-parser = ap.Parser()
+parser = ap.Parser(
+	script_name='edit'
+)
 parser.add_argument(
 	'option'
 )
@@ -22,9 +24,9 @@ parser.add_argument(
 
 def execute(text):
 	'''Change the option's value in the text editor.'''
+	args = parser.parse_args(text)
 	if not state.MOD_HANDLER.is_mod_set():
 		raise RuntimeError('Choose mod first')
-	args = parser.parse_args(text)
 	opt = state.MOD_HANDLER.get_mod_opt(args.option)
 	current_opt_value = opt.value
 	if args.e: current_opt_value = ''

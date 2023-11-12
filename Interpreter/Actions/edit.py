@@ -20,6 +20,11 @@ parser.add_argument(
 	'--choose-editor',
 	action='store_true'
 )
+parser.add_argument(
+	'-s',
+	'--suffix',
+	default=''
+)
 
 
 def execute(text):
@@ -33,13 +38,13 @@ def execute(text):
 	if not (editor_str := state.EDITOR_HANDLER.current_editor) or args.choose_editor:
 		editor_str = input('Editor:')
 	try:
-		with tempfile.NamedTemporaryFile(mode='w', delete=False) as tf:
+		with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=args.suffix) as tf:
 			tf.write(current_opt_value)
 		proc = subprocess.run([editor_str, tf.name])
 		if proc.returncode == 0:
 			state.EDITOR_HANDLER.current_editor = editor_str
 		with open(tf.name, 'r') as rtf:
-				opt.value = rtf.read()
+			opt.value = rtf.read()
 	finally: os.remove(tf.name)
 
 

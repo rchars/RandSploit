@@ -3,3 +3,6 @@ __pycache__/
 *$py.class
 test/
 venv/
+/nbproject/
+/.ropeproject/
+NetBeansRun.py

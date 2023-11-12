@@ -14,6 +14,15 @@ class Handler:
 				reader.read_file(config_file)
 			self._current_editor = reader.get('', 'editor')
 
+	def ask_for_editor(self, force=False):
+		if self._current_editor:
+			return self._current_editor
+		editor_str = input('Editor:').strip('\n')
+		if not editor_str:
+			raise RuntimeError('Editor not chosen')
+		self._current_editor = editor_str
+		return editor_str
+
 	@property
 	def editor_file_path(self):
 		return self._editor_file_path

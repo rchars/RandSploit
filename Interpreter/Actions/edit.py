@@ -44,7 +44,7 @@ def execute(text):
 		if proc.returncode == 0:
 			state.EDITOR_HANDLER.current_editor = editor_str
 		with open(tf.name, 'r') as rtf:
-			opt.value = rtf.read()
+			opt.value = rtf.read().strip()
 	finally: os.remove(tf.name)
 
 

@@ -23,10 +23,7 @@ class Mod(mb.ModIface):
 						self.rport.value
 					)
 				)
-				self.thread_handler(
-					cli_sock_1,
-					cli_sock_2
-				)
+				threading.Thread(target=self.thread_handler, args=(cli_sock_1, cli_sock_2,), daemon=True).start()
 		finally:
 			serv_sock.close()
 
@@ -40,6 +37,7 @@ class Mod(mb.ModIface):
 		finally:
 			for sock in (cli_sock_1, cli_sock_2):
 				try:
+					sock.shutdown(socket.SHUT_RDWR)
 					sock.close()
 				except OSError: pass
 

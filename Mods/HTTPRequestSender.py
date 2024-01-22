@@ -1,5 +1,6 @@
 import ModBuilder.ModBuilder as mb
 import requests
+import json
 
 
 deps = '''
@@ -12,7 +13,8 @@ methods_impl = {
 	'POST': requests.post,
 	'DELETE': requests.delete,
 	'HEAD': requests.head,
-	'OPTIONS': requests.options
+	'OPTIONS': requests.options,
+	'PUT': requests.put
 }
 
 
@@ -40,12 +42,17 @@ class Mod(mb.ModIface):
 		)
 
 	def run(self):
-		print(
-			methods_impl[
-				self.method.value
-			](
-				url=self.url.value,
-				data=self.data.value,
-				json=self.json.value
-			).text
+		if self.json.value != '':
+			try:
+				using_json = json.loads(self.json.value)
+			except json.JSONDecodeError as e:
+				print(e)
+		else: self.json.value: using_json = None
+		r = methods_impl[
+			self.method.value
+		](
+			url=self.url.value,
+			data=self.data.value,
+			json=using_json
 		)
+		print(r.status_code, r.text)

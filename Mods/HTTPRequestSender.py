@@ -42,12 +42,13 @@ class Mod(mb.ModIface):
 		)
 
 	def run(self):
+		using_json = ''
 		if self.json.value != '':
 			try:
 				using_json = json.loads(self.json.value)
 			except json.JSONDecodeError as e:
 				print(e)
-		else: self.json.value: using_json = None
+				return
 		r = methods_impl[
 			self.method.value
 		](

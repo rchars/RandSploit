@@ -56,4 +56,4 @@ class Mod(mb.ModIface):
 			data=self.data.value,
 			json=using_json
 		)
-		print(r.status_code, r.text)
+		print(r.status_code, '\n', r.text)

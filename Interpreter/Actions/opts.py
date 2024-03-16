@@ -18,6 +18,11 @@ import tabulate
 # 		)
 
 
+def fix_tab_print():
+	for data in state.MOD_HANDLER.iter_mod_opts_data():
+		yield [param.replace('\t', ' ' * 4) for param in data if type(param) == str]
+
+
 def execute():
 	'''Get a list of all options for the chosen module.'''
 	if not state.MOD_HANDLER.is_mod_set():
@@ -25,7 +30,8 @@ def execute():
 		return
 	print(
 		tabulate.tabulate(
-			state.MOD_HANDLER.iter_mod_opts_data(),
+			# state.MOD_HANDLER.iter_mod_opts_data(),
+			fix_tab_print(),
 			headers=state.MOD_HANDLER.opt_iface_params,
 			tablefmt=state.TABLEFMT,
 			showindex='never'
